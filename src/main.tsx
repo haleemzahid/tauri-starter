@@ -18,13 +18,9 @@ const queryClient = new QueryClient({
 
 const enableDevtools = import.meta.env.VITE_ENABLE_DEVTOOLS === 'true'
 
-// Initialize database and then render app
 async function startApp() {
   try {
-    console.log('Initializing database')
-
     await initDatabase()
-    console.log('✅ Database initialized successfully')
   } catch (error) {
     console.error('❌ Failed to initialize database:', error)
   }

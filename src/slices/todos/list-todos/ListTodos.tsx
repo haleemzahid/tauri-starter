@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { Plus, ListTodo } from 'lucide-react'
+import { BaseListPage } from '@/core/components'
 import TodoTable from './TodoTable'
 import TodoForm from '../create-todo/TodoForm'
 import { useListTodos } from './useListTodos'
@@ -64,67 +65,48 @@ export default function ListTodos() {
   }
 
   return (
-    <div className="space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-base-content">Todos</h1>
-          <p className="text-base-content/70 mt-2">
-            Manage your tasks with TanStack Router, Form, and Table
-          </p>
-        </div>
-        <button className="btn btn-primary gap-2" onClick={handleCreateNew}>
-          <Plus className="w-5 h-5" />
-          New Todo
-        </button>
-      </div>
-
-      {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <div className="stat bg-base-100 rounded-lg shadow">
-          <div className="stat-figure text-primary">
-            <ListTodo className="w-8 h-8" />
-          </div>
-          <div className="stat-title">Total</div>
-          <div className="stat-value text-primary">{stats.total}</div>
-        </div>
-
-        <div className="stat bg-base-100 rounded-lg shadow">
-          <div className="stat-title">Pending</div>
-          <div className="stat-value text-base-content">{stats.pending}</div>
-        </div>
-
-        <div className="stat bg-base-100 rounded-lg shadow">
-          <div className="stat-title">In Progress</div>
-          <div className="stat-value text-warning">{stats.inProgress}</div>
-        </div>
-
-        <div className="stat bg-base-100 rounded-lg shadow">
-          <div className="stat-title">Completed</div>
-          <div className="stat-value text-success">{stats.completed}</div>
-        </div>
-      </div>
-
-      {/* Error State */}
-      {error && (
-        <div className="alert alert-error">
-          <span>Error loading todos: {error.toString()}</span>
-        </div>
-      )}
-
-      {/* Loading State */}
-      {isLoading ? (
-        <div className="flex justify-center items-center py-12">
-          <span className="loading loading-spinner loading-lg"></span>
-        </div>
-      ) : (
+    <>
+      <BaseListPage
+        title="Todos"
+        description="Manage your tasks with TanStack Router, Form, and Table"
+        actionButton={{
+          label: 'New Todo',
+          icon: Plus,
+          onClick: handleCreateNew,
+        }}
+        stats={[
+          {
+            label: 'Total',
+            value: stats.total,
+            icon: ListTodo,
+            color: 'primary',
+          },
+          {
+            label: 'Pending',
+            value: stats.pending,
+            color: 'base-content',
+          },
+          {
+            label: 'In Progress',
+            value: stats.inProgress,
+            color: 'warning',
+          },
+          {
+            label: 'Completed',
+            value: stats.completed,
+            color: 'success',
+          },
+        ]}
+        isLoading={isLoading}
+        error={error}
+      >
         <TodoTable
           todos={todos}
           onDelete={handleDelete}
           onToggleStatus={handleToggleStatus}
           onEdit={handleEdit}
         />
-      )}
+      </BaseListPage>
 
       {/* Todo Form Modal */}
       <TodoForm
@@ -133,6 +115,6 @@ export default function ListTodos() {
         onCancel={handleCancel}
         isOpen={isFormOpen}
       />
-    </div>
+    </>
   )
 }

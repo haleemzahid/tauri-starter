@@ -81,7 +81,7 @@ export interface Update${toPascalCase(sliceName)}Input {
 fs.writeFileSync(path.join(sharedDir, 'types.ts'), typesContent)
 
 // Generate shared/database.ts
-const databaseContent = `import { getDatabase } from '../../../core/database/client'
+const databaseContent = `import { getDatabase } from '@/core/database/client'
 import type { ${toPascalCase(sliceName)}, Create${toPascalCase(sliceName)}Input, Update${toPascalCase(sliceName)}Input } from './types'
 
 /**
@@ -250,45 +250,155 @@ export function ${hookName}() {
 
   // Create a component file for list use case
   if (useCase === 'list') {
-    const componentContent = `import { ${hookName} } from './${hookName}'
+    // Create the table component
+    const tableContent = `import { useMemo } from 'react'
+import { type ColumnDef } from '@tanstack/react-table'
+import { Edit, Trash2 } from 'lucide-react'
+import {
+  BaseTable,
+  SortableHeader,
+  TableActions,
+  TableActionButton,
+  type ColumnFilter,
+} from '@/core/components'
+import type { ${toPascalCase(sliceName)} } from '../shared/types'
+
+interface ${toPascalCase(sliceName)}TableProps {
+  ${toCamelCase(sliceName)}s: ${toPascalCase(sliceName)}[]
+  onEdit: (item: ${toPascalCase(sliceName)}) => void
+  onDelete: (id: number) => void
+}
+
+export default function ${toPascalCase(sliceName)}Table({
+  ${toCamelCase(sliceName)}s,
+  onEdit,
+  onDelete,
+}: ${toPascalCase(sliceName)}TableProps) {
+  const columns = useMemo<ColumnDef<${toPascalCase(sliceName)}>[]>(
+    () => [
+      // TODO: Add your columns here
+      {
+        accessorKey: 'id',
+        header: ({ column }) => <SortableHeader column={column}>ID</SortableHeader>,
+        cell: (info) => <span>{info.getValue() as number}</span>,
+      },
+      // TODO: Add more columns based on your schema
+      // Example:
+      // {
+      //   accessorKey: 'name',
+      //   header: ({ column }) => <SortableHeader column={column}>Name</SortableHeader>,
+      //   cell: (info) => <span className="font-semibold">{info.getValue() as string}</span>,
+      // },
+
+      // Actions column
+      {
+        id: 'actions',
+        header: 'Actions',
+        cell: ({ row }) => {
+          const item = row.original
+          return (
+            <TableActions>
+              <TableActionButton onClick={() => onEdit(item)} title="Edit">
+                <Edit className="w-4 h-4" />
+              </TableActionButton>
+              <TableActionButton
+                onClick={() => onDelete(item.id)}
+                title="Delete"
+                variant="error"
+              >
+                <Trash2 className="w-4 h-4" />
+              </TableActionButton>
+            </TableActions>
+          )
+        },
+      },
+    ],
+    [onEdit, onDelete]
+  )
+
+  // TODO: Add filters based on your needs
+  const filters: ColumnFilter[] = [
+    // Example:
+    // {
+    //   id: 'status',
+    //   label: 'Filter by Status',
+    //   type: 'select',
+    //   options: [
+    //     { value: '', label: 'All' },
+    //     { value: 'active', label: 'Active' },
+    //     { value: 'inactive', label: 'Inactive' },
+    //   ],
+    // },
+  ]
+
+  return (
+    <BaseTable
+      data={${toCamelCase(sliceName)}s}
+      columns={columns}
+      filters={filters}
+      emptyMessage="No ${sliceName} found. Create one to get started!"
+      showStats
+    />
+  )
+}
+`
+    fs.writeFileSync(
+      path.join(useCaseDir, `${toPascalCase(sliceName)}Table.tsx`),
+      tableContent
+    )
+
+    // Create the list page component
+    const componentContent = `import { useState } from 'react'
+import { Plus, Package } from 'lucide-react'
+import { BaseListPage } from '@/core/components'
+import ${toPascalCase(sliceName)}Table from './${toPascalCase(sliceName)}Table'
+import { ${hookName} } from './${hookName}'
+import type { ${toPascalCase(sliceName)} } from '../shared/types'
 
 export default function ${toPascalCase(useCase)}${toPascalCase(sliceName)}() {
   const { data: ${toCamelCase(sliceName)}s = [], isLoading, error } = ${hookName}()
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-12">
-        <span className="loading loading-spinner loading-lg"></span>
-      </div>
-    )
+  // TODO: Implement create/edit/delete handlers
+  const handleCreate = () => {
+    console.log('Create new ${sliceName}')
   }
 
-  if (error) {
-    return (
-      <div className="alert alert-error">
-        <span>Error loading ${sliceName}: {error.toString()}</span>
-      </div>
-    )
+  const handleEdit = (item: ${toPascalCase(sliceName)}) => {
+    console.log('Edit ${sliceName}:', item)
+  }
+
+  const handleDelete = (id: number) => {
+    if (confirm('Are you sure you want to delete this ${sliceName}?')) {
+      console.log('Delete ${sliceName}:', id)
+    }
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-4xl font-bold text-base-content">${toPascalCase(sliceName)}</h1>
-          <p className="text-base-content/70 mt-2">
-            Manage your ${sliceName}
-          </p>
-        </div>
-      </div>
-
-      {/* TODO: Add your component content here */}
-      <div className="card bg-base-100 shadow-xl">
-        <div className="card-body">
-          <pre>{JSON.stringify(${toCamelCase(sliceName)}s, null, 2)}</pre>
-        </div>
-      </div>
-    </div>
+    <BaseListPage
+      title="${toPascalCase(sliceName)}"
+      description="Manage your ${sliceName}"
+      actionButton={{
+        label: 'New ${toPascalCase(sliceName)}',
+        icon: Plus,
+        onClick: handleCreate,
+      }}
+      stats={[
+        {
+          label: 'Total',
+          value: ${toCamelCase(sliceName)}s.length,
+          icon: Package,
+          color: 'primary',
+        },
+      ]}
+      isLoading={isLoading}
+      error={error}
+    >
+      <${toPascalCase(sliceName)}Table
+        ${toCamelCase(sliceName)}s={${toCamelCase(sliceName)}s}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+      />
+    </BaseListPage>
   )
 }
 `
@@ -331,7 +441,7 @@ console.log('✅ Created index.ts and config.ts')
 // Generate route file
 const routePath = path.join(__dirname, '..', 'src', 'routes', `${sliceName}.tsx`)
 const routeContent = `import { createFileRoute } from '@tanstack/react-router'
-import { List${toPascalCase(sliceName)} } from '../slices/${sliceName}'
+import { List${toPascalCase(sliceName)} } from '@/slices/${sliceName}'
 
 export const Route = createFileRoute('/${sliceName}')({
   component: List${toPascalCase(sliceName)},
@@ -346,5 +456,16 @@ console.log('📝 Next steps:')
 console.log(`   1. Add the table schema to src/core/database/client.ts`)
 console.log(`   2. Import ${toCamelCase(sliceName)}Config in src/config/nav-items.ts`)
 console.log(`   3. Add it to the navItems array`)
-console.log(`   4. Implement your components and database queries`)
-console.log(`   5. Start building! 🚀\n`)
+console.log(`   4. Implement your database queries in shared/database.ts`)
+console.log(`   5. Customize the generated table columns in ${toPascalCase(sliceName)}Table.tsx`)
+console.log(`   6. Add table filters if needed`)
+console.log(`   7. Implement create/edit forms using BaseDialog`)
+console.log(`   8. Wire up the handlers in List${toPascalCase(sliceName)}.tsx`)
+console.log(`   9. Customize the BaseListPage stats as needed`)
+console.log(`   10. Start building! 🚀\n`)
+console.log('💡 Tips:')
+console.log(`   - BaseListPage provides header, stats, loading, and error states`)
+console.log(`   - BaseTable handles sorting, filtering, and pagination`)
+console.log(`   - BaseDialog provides consistent modal dialogs`)
+console.log(`   - Use SortableHeader, TableBadge, and TableActions for common table patterns`)
+console.log(`   - Use @/ alias for clean imports (e.g., @/core/components)\n`)

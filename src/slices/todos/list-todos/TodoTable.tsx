@@ -1,14 +1,5 @@
-import { useMemo, useState } from 'react'
-import {
-  createColumnHelper,
-  flexRender,
-  getCoreRowModel,
-  getSortedRowModel,
-  getFilteredRowModel,
-  useReactTable,
-  type SortingState,
-  type ColumnFiltersState,
-} from '@tanstack/react-table'
+import { useMemo } from 'react'
+import { type ColumnDef } from '@tanstack/react-table'
 import {
   CheckCircle,
   Circle,
@@ -16,8 +7,15 @@ import {
   Trash2,
   Edit,
   AlertCircle,
-  ArrowUpDown,
 } from 'lucide-react'
+import {
+  BaseTable,
+  SortableHeader,
+  TableBadge,
+  TableActions,
+  TableActionButton,
+  type ColumnFilter,
+} from '@/core/components'
 import type { Todo } from '../shared/types'
 
 interface TodoTableProps {
@@ -27,24 +25,20 @@ interface TodoTableProps {
   onEdit: (todo: Todo) => void
 }
 
-const columnHelper = createColumnHelper<Todo>()
-
 export default function TodoTable({
   todos,
   onDelete,
   onToggleStatus,
   onEdit,
 }: TodoTableProps) {
-  const [sorting, setSorting] = useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
-
-  const columns = useMemo(
+  const columns = useMemo<ColumnDef<Todo>[]>(
     () => [
       // Status column with icon
-      columnHelper.accessor('status', {
+      {
+        accessorKey: 'status',
         header: 'Status',
         cell: (info) => {
-          const status = info.getValue()
+          const status = info.getValue() as Todo['status']
           return (
             <div className="flex items-center gap-2">
               {status === 'completed' ? (
@@ -59,76 +53,60 @@ export default function TodoTable({
           )
         },
         filterFn: 'equals',
-      }),
+      },
 
       // Title column
-      columnHelper.accessor('title', {
-        header: ({ column }) => {
-          return (
-            <button
-              className="flex items-center gap-2 hover:text-primary"
-              onClick={() => column.toggleSorting()}
-            >
-              Title
-              <ArrowUpDown className="w-4 h-4" />
-            </button>
-          )
-        },
+      {
+        accessorKey: 'title',
+        header: ({ column }) => (
+          <SortableHeader column={column}>Title</SortableHeader>
+        ),
         cell: (info) => (
           <div className="font-semibold text-base-content">
-            {info.getValue()}
+            {info.getValue() as string}
           </div>
         ),
-      }),
+      },
 
       // Description column
-      columnHelper.accessor('description', {
+      {
+        accessorKey: 'description',
         header: 'Description',
         cell: (info) => {
-          const desc = info.getValue()
+          const desc = info.getValue() as string | null
           return (
             <div className="text-sm text-base-content/70 max-w-md truncate">
               {desc ?? '-'}
             </div>
           )
         },
-      }),
+      },
 
       // Priority column with badge
-      columnHelper.accessor('priority', {
+      {
+        accessorKey: 'priority',
         header: 'Priority',
         cell: (info) => {
-          const priority = info.getValue()
-          const badgeClass =
+          const priority = info.getValue() as Todo['priority']
+          const variant =
             priority === 'high'
-              ? 'badge-error'
+              ? 'error'
               : priority === 'medium'
-                ? 'badge-warning'
-                : 'badge-info'
-          return (
-            <div className={`badge ${badgeClass} badge-sm capitalize`}>
-              {priority}
-            </div>
-          )
+                ? 'warning'
+                : 'info'
+          return <TableBadge variant={variant}>{priority}</TableBadge>
         },
         filterFn: 'equals',
-      }),
+      },
 
       // Due date column
-      columnHelper.accessor('due_date', {
-        header: ({ column }) => {
-          return (
-            <button
-              className="flex items-center gap-2 hover:text-primary"
-              onClick={() => column.toggleSorting()}
-            >
-              Due Date
-              <ArrowUpDown className="w-4 h-4" />
-            </button>
-          )
-        },
+      {
+        accessorKey: 'due_date',
+        header: ({ column }) => (
+          <SortableHeader column={column}>Due Date</SortableHeader>
+        ),
         cell: (info) => {
-          const date = info.getValue()
+          const date = info.getValue() as string | null
           if (!date) return <span className="text-base-content/50">-</span>
 
           const dueDate = new Date(date)
@@ -144,18 +122,17 @@ export default function TodoTable({
             </div>
           )
         },
-      }),
+      },
 
       // Actions column
-      columnHelper.display({
+      {
         id: 'actions',
         header: 'Actions',
         cell: ({ row }) => {
           const todo = row.original
           return (
-            <div className="flex gap-2">
-              <button
-                className="btn btn-ghost btn-xs"
+            <TableActions>
+              <TableActionButton
                 onClick={() => onToggleStatus(todo.id)}
                 title={
                   todo.status === 'completed'
@@ -168,147 +145,57 @@ export default function TodoTable({
                 ) : (
                   <CheckCircle className="w-4 h-4" />
                 )}
-              </button>
-              <button
-                className="btn btn-ghost btn-xs"
-                onClick={() => onEdit(todo)}
-                title="Edit"
-              >
+              </TableActionButton>
+              <TableActionButton onClick={() => onEdit(todo)} title="Edit">
                 <Edit className="w-4 h-4" />
-              </button>
-              <button
-                className="btn btn-ghost btn-xs text-error"
+              </TableActionButton>
+              <TableActionButton
                 onClick={() => onDelete(todo.id)}
                 title="Delete"
+                variant="error"
               >
                 <Trash2 className="w-4 h-4" />
-              </button>
-            </div>
+              </TableActionButton>
+            </TableActions>
           )
         },
-      }),
+      },
     ],
     [onDelete, onToggleStatus, onEdit]
   )
 
-  const table = useReactTable({
-    data: todos,
-    columns,
-    state: {
-      sorting,
-      columnFilters,
+  const filters: ColumnFilter[] = [
+    {
+      id: 'status',
+      label: 'Filter by Status',
+      type: 'select',
+      options: [
+        { value: '', label: 'All' },
+        { value: 'pending', label: 'Pending' },
+        { value: 'in-progress', label: 'In Progress' },
+        { value: 'completed', label: 'Completed' },
+      ],
     },
-    onSortingChange: setSorting,
-    onColumnFiltersChange: setColumnFilters,
-    getCoreRowModel: getCoreRowModel(),
-    getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
-  })
+    {
+      id: 'priority',
+      label: 'Filter by Priority',
+      type: 'select',
+      options: [
+        { value: '', label: 'All' },
+        { value: 'low', label: 'Low' },
+        { value: 'medium', label: 'Medium' },
+        { value: 'high', label: 'High' },
+      ],
+    },
+  ]
 
   return (
-    <div className="space-y-4">
-      {/* Filters */}
-      <div className="flex gap-4 flex-wrap">
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Filter by Status</span>
-          </label>
-          <select
-            className="select select-bordered select-sm"
-            value={
-              (table.getColumn('status')?.getFilterValue() as string) ?? ''
-            }
-            onChange={(e) =>
-              table
-                .getColumn('status')
-                ?.setFilterValue(
-                  e.target.value !== '' ? e.target.value : undefined
-                )
-            }
-          >
-            <option value="">All</option>
-            <option value="pending">Pending</option>
-            <option value="in-progress">In Progress</option>
-            <option value="completed">Completed</option>
-          </select>
-        </div>
-
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Filter by Priority</span>
-          </label>
-          <select
-            className="select select-bordered select-sm"
-            value={
-              (table.getColumn('priority')?.getFilterValue() as string) ?? ''
-            }
-            onChange={(e) =>
-              table
-                .getColumn('priority')
-                ?.setFilterValue(
-                  e.target.value !== '' ? e.target.value : undefined
-                )
-            }
-          >
-            <option value="">All</option>
-            <option value="low">Low</option>
-            <option value="medium">Medium</option>
-            <option value="high">High</option>
-          </select>
-        </div>
-      </div>
-
-      {/* Table */}
-      <div className="overflow-x-auto bg-base-100 rounded-lg shadow">
-        <table className="table table-zebra">
-          <thead>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <tr key={headerGroup.id}>
-                {headerGroup.headers.map((header) => (
-                  <th key={header.id}>
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
-                  </th>
-                ))}
-              </tr>
-            ))}
-          </thead>
-          <tbody>
-            {table.getRowModel().rows.length === 0 ? (
-              <tr>
-                <td colSpan={columns.length} className="text-center py-8">
-                  <div className="text-base-content/50">
-                    No todos found. Create one to get started!
-                  </div>
-                </td>
-              </tr>
-            ) : (
-              table.getRowModel().rows.map((row) => (
-                <tr key={row.id}>
-                  {row.getVisibleCells().map((cell) => (
-                    <td key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </td>
-                  ))}
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-
-      {/* Stats */}
-      <div className="text-sm text-base-content/70">
-        Showing {table.getFilteredRowModel().rows.length} of {todos.length}{' '}
-        todos
-      </div>
-    </div>
+    <BaseTable
+      data={todos}
+      columns={columns}
+      filters={filters}
+      emptyMessage="No todos found. Create one to get started!"
+      showStats
+    />
   )
 }
