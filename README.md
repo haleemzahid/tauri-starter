@@ -149,9 +149,12 @@ npm run type-check       # Run TypeScript type checking
 
 ```bash
 # Generate a new feature slice
-node scripts/create-slice.js <feature> <use-case-1> [use-case-2...]
+npm run slice:create <feature> <use-case-1> [use-case-2...]
 
 # Example: Create a users feature with CRUD operations
+npm run slice:create users list create update delete
+
+# Or run directly with Node
 node scripts/create-slice.js users list create update delete
 ```
 
@@ -230,7 +233,7 @@ let db_url = env::var("DATABASE_URL").unwrap_or_default();
 ### 1. Generate the Slice
 
 ```bash
-node scripts/create-slice.js products list create update delete
+npm run slice:create products list create update delete
 ```
 
 ### 2. Add Database Table
