@@ -1,17 +1,18 @@
-import { Link, Outlet, useLocation } from 'react-router-dom'
+import { Link, useRouterState } from '@tanstack/react-router'
 import { Home, Menu } from 'lucide-react'
-import { navItems, type NavItem } from '../config/nav-items'
+import { navItems, type NavItem } from '../../config/nav-items'
 
-export default function Layout() {
-  const location = useLocation()
+export default function Layout({ children }: { children: React.ReactNode }) {
+  const router = useRouterState()
 
-  const isActive = (path: string) => location.pathname === path
+  const isActive = (path: string) => router.location.pathname === path
 
   // Check if any child is active for parent items
   const hasActiveChild = (item: NavItem): boolean => {
     if (!item.children) return false
     return item.children.some(
-      (child) => child.path === location.pathname || hasActiveChild(child)
+      (child: NavItem) =>
+        child.path === location.pathname || hasActiveChild(child)
     )
   }
 
@@ -35,9 +36,7 @@ export default function Layout() {
         </div>
 
         {/* Page content */}
-        <div className="p-4 lg:p-8">
-          <Outlet />
-        </div>
+        <div className="p-4 lg:p-8">{children}</div>
       </div>
 
       {/* Sidebar */}
@@ -116,7 +115,7 @@ export default function Layout() {
     // Regular item with link
     return (
       <li className="w-full">
-        <Link to={item.path!} className={itemIsActive ? 'menu-active' : ''}>
+        <Link to={item.path} className={itemIsActive ? 'menu-active' : ''}>
           <Icon className="w-5 h-5" />
           {item.label}
           {item.badge && (

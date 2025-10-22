@@ -1,4 +1,5 @@
-import { LucideIcon, Home, Settings } from 'lucide-react'
+import { LucideIcon } from 'lucide-react'
+import { todosConfig } from '../slices/todos/config'
 
 /**
  * Navigation Item Interface
@@ -17,42 +18,8 @@ export interface NavItem {
   children?: NavItem[]
 }
 
-export const navItems: NavItem[] = [
-  {
-    label: 'Dashboard',
-    path: '/',
-    icon: Home,
-  },
-  {
-    label: 'Settings',
-    path: '/settings',
-    icon: Settings,
-  },
-  // {
-  //   label: 'Management',
-  //   icon: Users,
-  //   children: [
-  //     {
-  //       label: 'Users',
-  //       path: '/management/users',
-  //       icon: Users,
-  //     },
-  //     {
-  //       label: 'Roles',
-  //       path: '/management/roles',
-  //       icon: FileText,
-  //     },
-  //   ],
-  // },
-  // {
-  //   label: 'Analytics',
-  //   path: '/analytics',
-  //   icon: BarChart3,
-  //   badge: 'New',
-  // },
-  // {
-  //   label: 'Products',
-  //   path: '/products',
-  //   icon: Package,
-  // },
-]
+/**
+ * Navigation items - automatically populated from slice configs
+ * To add a new nav item, create a config.ts in your slice and import it here
+ */
+export const navItems: NavItem[] = [todosConfig]

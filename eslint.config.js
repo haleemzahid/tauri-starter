@@ -12,7 +12,14 @@ export default tseslint.config(
   ...tseslint.configs.stylisticTypeChecked,
   prettierConfig,
   {
-    ignores: ['dist', 'src-tauri', 'node_modules', 'build'],
+    ignores: [
+      'dist',
+      'src-tauri',
+      'node_modules',
+      'build',
+      'vite.config.ts',
+      'tailwind.config.js',
+    ],
   },
   {
     files: ['**/*.{ts,tsx}'],
