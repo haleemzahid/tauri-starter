@@ -5,41 +5,158 @@ import {
   useCartActions,
   useSetInvoiceDiscount,
   useSelectedCartItem,
+  useModifierSelections,
+  useResetModifierSelections,
 } from './shared/store'
-import type { Product, CartItem, ServiceMethod, Discount } from './shared/types'
+import { useSetSelectedProduct } from './shared/store/ui-atoms'
+import { getProductWithDetails } from './shared/database/product-queries'
+import type {
+  Product,
+  CartItem,
+  CartItemModifier,
+  ServiceMethod,
+  Discount,
+} from './shared/types'
 
 export type OrderView = 'menu' | 'modifiers' | 'payment' | 'discount'
+
+/** Check if product needs modifier configuration */
+function productNeedsModifiers(product: Product): boolean {
+  const hasSizes = (product.assignedSizes?.length ?? 0) > 0
+  const hasTypes = (product.productTypes?.length ?? 0) > 0
+  const hasPortions = (product.portionTypes?.length ?? 0) > 0
+  const hasModifiers = (product.toppingCategories?.length ?? 0) > 0
+  return hasSizes || hasTypes || hasPortions || hasModifiers
+}
 
 export function useOrderEntry() {
   const [currentView, setCurrentView] = useState<OrderView>('menu')
   const [serviceMethod, setServiceMethod] = useState<ServiceMethod | null>(null)
+  const [pendingProduct, setPendingProduct] = useState<Product | null>(null)
+  const [isLoadingProduct, setIsLoadingProduct] = useState(false)
 
-  const { addItem, clearCart, setItemDiscount } = useCartActions()
+  const { addItem, updateItem, removeItem, clearCart, setItemDiscount } =
+    useCartActions()
   const setInvoiceDiscount = useSetInvoiceDiscount()
   const selectedItem = useSelectedCartItem()
+  const setSelectedProduct = useSetSelectedProduct()
+  const modifierSelections = useModifierSelections()
+  const resetModifierSelections = useResetModifierSelections()
 
   // --- Product Actions ---
   const handleProductSelect = useCallback(
-    (product: Product) => {
-      // TODO: Check if product needs modifiers (sizes, toppings)
-      const newItem: CartItem = {
-        id: crypto.randomUUID(),
-        product,
-        quantity: 1,
-        portions: [],
-        modifiers: [],
-        taxRate: product.isTaxed ? 0.0825 : 0, // TODO: fetch from DB
-        specialInstructions: [],
-        createdAt: new Date(),
+    async (product: Product) => {
+      setIsLoadingProduct(true)
+      try {
+        // Load full product details (sizes, types, portions, toppings)
+        const details = await getProductWithDetails(product.id)
+        const fullProduct: Product = {
+          ...product,
+          assignedSizes: details.assignedSizes,
+          productTypes: details.productTypes,
+          portionTypes: details.portionTypes,
+          toppingCategories: details.toppingCategories,
+        }
+
+        if (productNeedsModifiers(fullProduct)) {
+          // Store product and show modifier view
+          setPendingProduct(fullProduct)
+          setSelectedProduct(fullProduct)
+          setCurrentView('modifiers')
+        } else {
+          // Add directly to cart
+          const newItem: CartItem = {
+            id: crypto.randomUUID(),
+            product: fullProduct,
+            quantity: 1,
+            portions: [],
+            modifiers: [],
+            taxRate: fullProduct.isTaxed ? 0.0825 : 0,
+            specialInstructions: [],
+            createdAt: new Date(),
+          }
+          addItem(newItem)
+        }
+      } finally {
+        setIsLoadingProduct(false)
       }
-      addItem(newItem)
     },
-    [addItem]
+    [addItem, setSelectedProduct]
   )
 
-  const handleEditItem = useCallback((_item: CartItem) => {
-    setCurrentView('modifiers')
-  }, [])
+  const handleEditItem = useCallback(
+    (item: CartItem) => {
+      setPendingProduct(item.product)
+      setSelectedProduct(item.product)
+      setCurrentView('modifiers')
+    },
+    [setSelectedProduct]
+  )
+
+  // --- Modifier Actions ---
+  const handleModifierConfirm = useCallback(() => {
+    if (!pendingProduct) return
+
+    // Build modifiers array from selections
+    const modifiers: CartItemModifier[] = []
+    modifierSelections.modifiersByCategory.forEach((mods) => {
+      mods.forEach((mod) => {
+        modifiers.push({
+          id: mod.id,
+          topping: mod.topping,
+          affix: mod.affix,
+          quantity: mod.quantity,
+        })
+      })
+    })
+
+    const newItem: CartItem = {
+      id: crypto.randomUUID(),
+      product: pendingProduct,
+      quantity: modifierSelections.quantity,
+      size: modifierSelections.size ?? undefined,
+      type: modifierSelections.type ?? undefined,
+      portions: modifierSelections.portions.map((p) => ({
+        id: crypto.randomUUID(),
+        portionType: p,
+        modifiers: [],
+      })),
+      modifiers,
+      taxRate: pendingProduct.isTaxed ? 0.0825 : 0,
+      specialInstructions: [],
+      createdAt: new Date(),
+    }
+
+    addItem(newItem)
+    resetModifierSelections()
+    setPendingProduct(null)
+    setSelectedProduct(null)
+    setCurrentView('menu')
+  }, [
+    pendingProduct,
+    modifierSelections,
+    addItem,
+    resetModifierSelections,
+    setSelectedProduct,
+  ])
+
+  const handleModifierCancel = useCallback(() => {
+    resetModifierSelections()
+    setPendingProduct(null)
+    setSelectedProduct(null)
+    setCurrentView('menu')
+  }, [resetModifierSelections, setSelectedProduct])
+
+  const handleModifierDelete = useCallback(() => {
+    // If editing existing item, remove it
+    if (selectedItem) {
+      removeItem(selectedItem.id)
+    }
+    resetModifierSelections()
+    setPendingProduct(null)
+    setSelectedProduct(null)
+    setCurrentView('menu')
+  }, [selectedItem, removeItem, resetModifierSelections, setSelectedProduct])
 
   // --- Order Actions ---
   const handlePay = useCallback(() => setCurrentView('payment'), [])
@@ -79,6 +196,7 @@ export function useOrderEntry() {
     currentView,
     serviceMethod,
     selectedItem,
+    isLoadingProduct,
 
     // Setters
     setServiceMethod,
@@ -86,6 +204,11 @@ export function useOrderEntry() {
     // Product actions
     handleProductSelect,
     handleEditItem,
+
+    // Modifier actions
+    handleModifierConfirm,
+    handleModifierCancel,
+    handleModifierDelete,
 
     // Order actions
     handlePay,

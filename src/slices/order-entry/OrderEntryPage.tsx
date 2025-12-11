@@ -3,6 +3,7 @@
 import { MenuBrowseView } from './browse-menu'
 import { CartPanel } from './components/cart'
 import { DiscountView } from './discount-view'
+import { ModifierView } from './modifier-view'
 import { useOrderEntry } from './useOrderEntry'
 
 export function OrderEntryPage() {
@@ -13,6 +14,9 @@ export function OrderEntryPage() {
     setServiceMethod,
     handleProductSelect,
     handleEditItem,
+    handleModifierConfirm,
+    handleModifierCancel,
+    handleModifierDelete,
     handlePay,
     handleHold,
     handleCancel,
@@ -42,9 +46,11 @@ export function OrderEntryPage() {
           <MenuBrowseView onProductSelect={handleProductSelect} />
         )}
         {currentView === 'modifiers' && (
-          <div className="flex h-full items-center justify-center">
-            <p className="text-base-content/50">Modifier view coming soon...</p>
-          </div>
+          <ModifierView
+            onConfirm={handleModifierConfirm}
+            onCancel={handleModifierCancel}
+            onDelete={handleModifierDelete}
+          />
         )}
         {currentView === 'payment' && (
           <div className="flex h-full items-center justify-center">

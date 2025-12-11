@@ -54,14 +54,12 @@ export function CartItemRow({
         {/* Name + Size/Portion */}
         <div className="flex-1">
           <span className="font-medium">
+            {item.size && (
+              <span>{item.size.size?.name ?? item.size.size?.displayName} </span>
+            )}
             {item.product.displayName ?? item.product.name}
             {discountSuffix}
           </span>
-          {item.size && (
-            <span className="text-base-content/70 ml-1 text-sm">
-              ({item.size.size?.displayName ?? item.size.size?.name})
-            </span>
-          )}
           {item.portions.length > 0 && (
             <span className="text-base-content/70 ml-1 text-sm">
               [{item.portions.map((p) => p.portionType.name).join(' / ')}]

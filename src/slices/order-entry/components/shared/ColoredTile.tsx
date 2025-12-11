@@ -43,7 +43,7 @@ export function ColoredTile({
         }}
         className={`
           w-full flex items-center justify-center
-          min-h-[48px] px-3 py-2
+          min-h-12 px-3 py-2
           rounded-md font-medium text-sm
           border border-base-300
           transition-all duration-150

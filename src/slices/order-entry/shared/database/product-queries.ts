@@ -17,7 +17,21 @@ export async function getAssignedSizesByProductId(
   productId: string
 ): Promise<AssignedSize[]> {
   const db = await getDatabase()
-  return db.select<AssignedSize[]>(
+
+  interface FlatAssignedSize {
+    id: string
+    productId: string
+    sizeId: string
+    price: number
+    isAssigned: boolean
+    orderNumber: number
+    sizeObjId: string
+    sizeName: string
+    sizeDisplayName: string
+    sizeOrderNumber: number
+  }
+
+  const rows = await db.select<FlatAssignedSize[]>(
     `
     SELECT 
       a.Id as id,
@@ -25,18 +39,34 @@ export async function getAssignedSizesByProductId(
       a.SizeId as sizeId,
       a.Price as price,
       a.IsAssigned as isAssigned,
-      a.OrderNumber as orderNumber,
-      s.Id as 'size.id',
-      s.Name as 'size.name',
-      s.DisplayName as 'size.displayName',
-      s.OrderNumber as 'size.orderNumber'
-    FROM AssignedSizes a
+      0 as orderNumber,
+      s.Id as sizeObjId,
+      s.Name as sizeName,
+      s.DisplayName as sizeDisplayName,
+      s.OrderNumber as sizeOrderNumber
+    FROM AssingedSizes a
     LEFT JOIN Sizes s ON a.SizeId = s.Id
     WHERE a.ProductId = $1 AND a.IsAssigned = 1
-    ORDER BY s.OrderNumber, a.OrderNumber
+    ORDER BY s.OrderNumber
   `,
     [productId]
   )
+
+  // Transform flat rows into nested objects
+  return rows.map((row) => ({
+    id: row.id,
+    productId: row.productId,
+    sizeId: row.sizeId,
+    price: Number(row.price) || 0,
+    isAssigned: Boolean(row.isAssigned),
+    orderNumber: row.orderNumber,
+    size: {
+      id: row.sizeObjId,
+      name: row.sizeName,
+      displayName: row.sizeDisplayName,
+      orderNumber: row.sizeOrderNumber,
+    },
+  }))
 }
 
 /**
@@ -53,10 +83,10 @@ export async function getProductTypesByProductId(
       ProductId as productId,
       Name as name,
       DisplayName as displayName,
-      Price as price,
+      0 as price,
       OrderNumber as orderNumber
     FROM ProductTypes 
-    WHERE ProductId = $1 AND IsDeleted = 0
+    WHERE ProductId = $1
     ORDER BY OrderNumber
   `,
     [productId]
@@ -77,10 +107,10 @@ export async function getPortionTypesByProductId(
       ProductId as productId,
       Name as name,
       DisplayName as displayName,
-      Price as price,
+      0 as price,
       OrderNumber as orderNumber
     FROM PortionTypes 
-    WHERE ProductId = $1 AND IsDeleted = 0
+    WHERE ProductId = $1
     ORDER BY OrderNumber
   `,
     [productId]
@@ -103,10 +133,9 @@ export async function getToppingCategoriesByProductId(
       DisplayName as displayName,
       IsMandatory as isMandatory,
       CanAddMultiple as canAddMultiple,
-      OrderNumber as orderNumber,
-      IsActive as isActive
+      OrderNumber as orderNumber
     FROM ToppingCategories 
-    WHERE ProductId = $1 AND IsActive = 1 AND IsDeleted = 0
+    WHERE ProductId = $1
     ORDER BY IsMandatory DESC, OrderNumber
   `,
     [productId]
@@ -124,16 +153,15 @@ export async function getToppingsByCategoryId(
     `
     SELECT 
       Id as id,
-      ToppingCatGuid as toppingCategoryId,
+      ToppingCategoryId as toppingCategoryId,
       Name as name,
       DisplayName as displayName,
       Price as price,
       BackColor as backColor,
       ForeColor as foreColor,
-      OrderNumber as orderNumber,
-      IsActive as isActive
+      OrderNumber as orderNumber
     FROM Toppings 
-    WHERE ToppingCatGuid = $1 AND IsActive = 1 AND IsDeleted = 0
+    WHERE ToppingCategoryId = $1
     ORDER BY OrderNumber
   `,
     [toppingCategoryId]
