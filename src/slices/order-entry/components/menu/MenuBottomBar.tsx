@@ -1,19 +1,16 @@
 // MenuBottomBar - Bottom action bar with item-level actions
 
 import { useOrderEntryActions } from '../../browse-menu/useOrderEntryActions'
+import { useActionHandlers } from '../../shared/hooks/useActionHandlers'
+import { useSelectedCartItem } from '../../shared/store'
 import { ActionButton } from './ActionButton'
-import type { ActionType } from '../../shared/types/order-entry-action'
 
-interface MenuBottomBarProps {
-  hasSelectedItem?: boolean
-  onAction?: (actionType: ActionType) => void
-}
-
-export function MenuBottomBar({
-  hasSelectedItem = false,
-  onAction,
-}: MenuBottomBarProps) {
+export function MenuBottomBar() {
   const { data: actions = [], isLoading } = useOrderEntryActions()
+  const { handleAction, isActionActive } = useActionHandlers()
+  const selectedItem = useSelectedCartItem()
+
+  const hasSelectedItem = selectedItem !== null
 
   if (isLoading) {
     return (
@@ -21,10 +18,6 @@ export function MenuBottomBar({
         <span className="loading loading-spinner loading-sm" />
       </div>
     )
-  }
-
-  const handleAction = (actionType: ActionType) => {
-    onAction?.(actionType)
   }
 
   // Item-scoped actions require a selected item
@@ -37,6 +30,7 @@ export function MenuBottomBar({
           key={action.id}
           action={action}
           disabled={isDisabled(action.scope)}
+          isActive={isActionActive(action.type)}
           onClick={() => handleAction(action.type)}
         />
       ))}

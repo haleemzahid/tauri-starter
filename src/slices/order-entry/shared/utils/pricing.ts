@@ -72,17 +72,18 @@ export function calculateItemDiscount(item: CartItem): number {
 
 /**
  * Calculate item tax
- * Formula: ((LinePrice - Discount) / 100) × TaxRate
+ * Formula: (LinePrice - Discount) × TaxRate
+ * Note: taxRate is stored as decimal (0.0825 = 8.25%)
  */
 export function calculateItemTax(item: CartItem, isTaxExempt: boolean): number {
-  // Skip tax if invoice is tax exempt or item is tax-free
-  if (isTaxExempt || !item.product.isTaxed) return 0
+  // Skip tax if invoice is tax exempt, item is tax-free, or product is not taxed
+  if (isTaxExempt || item.isTaxFree || !item.product.isTaxed) return 0
 
   const linePrice = calculateItemLinePrice(item)
   const discount = calculateItemDiscount(item)
   const taxableAmount = linePrice - discount
 
-  return (taxableAmount / 100) * item.taxRate
+  return taxableAmount * item.taxRate
 }
 
 /**

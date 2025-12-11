@@ -32,6 +32,7 @@ type CartAction =
       modifierId: string
     }
   | { type: 'SET_ITEM_DISCOUNT'; itemId: string; discount: Discount | null }
+  | { type: 'SET_ITEM_TAX_FREE'; itemId: string; isTaxFree: boolean }
   | { type: 'CLEAR_CART' }
   | { type: 'LOAD_CART'; items: CartItem[] }
 
@@ -113,6 +114,13 @@ function cartReducer(state: CartItem[], action: CartAction): CartItem[] {
       return state.map((item) =>
         item.id === action.itemId
           ? { ...item, itemDiscount: action.discount ?? undefined }
+          : item
+      )
+
+    case 'SET_ITEM_TAX_FREE':
+      return state.map((item) =>
+        item.id === action.itemId
+          ? { ...item, isTaxFree: action.isTaxFree }
           : item
       )
 
@@ -221,6 +229,9 @@ export function useCartActions() {
     },
     setItemDiscount: (itemId: string, discount: Discount | null) => {
       dispatch({ type: 'SET_ITEM_DISCOUNT', itemId, discount })
+    },
+    setItemTaxFree: (itemId: string, isTaxFree: boolean) => {
+      dispatch({ type: 'SET_ITEM_TAX_FREE', itemId, isTaxFree })
     },
     clearCart: () => {
       dispatch({ type: 'CLEAR_CART' })

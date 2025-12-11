@@ -18,9 +18,10 @@ export interface CartItem {
   size?: AssignedSize
   type?: ProductType
   portions: CartItemPortion[]
-  modifiers: CartItemModifier[] // Item-level modifiers (when no portions)
+  modifiers: CartItemModifier[]
   itemDiscount?: CartDiscount
-  taxRate: number // Resolved at add time from TaxRate table
+  taxRate: number
+  isTaxFree?: boolean // Item-level tax exemption (Make Tax Free action)
   specialInstructions: string[]
   createdAt: Date
 }

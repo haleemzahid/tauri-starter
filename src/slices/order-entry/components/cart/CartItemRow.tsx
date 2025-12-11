@@ -6,18 +6,38 @@ import type { CartItem } from '../../shared/types'
 
 interface CartItemRowProps {
   item: CartItem
+  isSelected?: boolean
+  onSelect: (item: CartItem) => void
   onEdit: (item: CartItem) => void
   onRemove: (itemId: string) => void
 }
 
-export function CartItemRow({ item, onEdit, onRemove }: CartItemRowProps) {
+// Style classes extracted for readability
+const baseStyles = 'flex cursor-pointer flex-col border-b border-base-300 py-2 px-1 transition-colors'
+const hoverStyles = 'hover:bg-base-200'
+const selectedStyles = 'bg-base-200'
+const unselectedStyles = ''
+
+export function CartItemRow({
+  item,
+  isSelected = false,
+  onSelect,
+  onEdit,
+  onRemove,
+}: CartItemRowProps) {
   const hasModifiers =
     item.modifiers.length > 0 ||
     item.portions.some((p) => p.modifiers.length > 0)
   const lineTotal = calculateItemLinePrice(item)
 
+  const rowClassName = [
+    baseStyles,
+    hoverStyles,
+    isSelected ? selectedStyles : unselectedStyles,
+  ].join(' ')
+
   return (
-    <div className="border-base-300 flex flex-col border-b py-2">
+    <div className={rowClassName} onClick={() => onSelect(item)}>
       {/* Main row */}
       <div className="flex items-center gap-2">
         {/* Quantity */}
