@@ -2,14 +2,18 @@ import Database from '@tauri-apps/plugin-sql'
 
 let db: Database | null = null
 
+// Path to existing PennPOS database
+const PENNPOS_DB_PATH =
+  'sqlite:C:\\Users\\Haleem Khan\\AppData\\Local\\Packages\\com.companynameV2.PennPOS.App_dp9yhbjdv06c8\\LocalState\\efcoredbv2.db3'
+
 /**
  * Initialize the SQLite database
- * The database file will be created in the app data directory
+ * Connects to the existing PennPOS database
  */
 export async function initDatabase() {
   if (!db) {
-    // The path is relative to the app data directory
-    db = await Database.load('sqlite:app.db')
+    // Connect to existing PennPOS database
+    db = await Database.load(PENNPOS_DB_PATH)
 
     // Create todos table
     await db.execute(`

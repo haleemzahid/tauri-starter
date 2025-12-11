@@ -1,5 +1,6 @@
 import { LucideIcon } from 'lucide-react'
 import { todosConfig } from '../slices/todos/config'
+import { orderEntryNavItem } from '@/slices/order-entry/config'
 
 /**
  * Navigation Item Interface
@@ -22,4 +23,4 @@ export interface NavItem {
  * Navigation items - automatically populated from slice configs
  * To add a new nav item, create a config.ts in your slice and import it here
  */
-export const navItems: NavItem[] = [todosConfig]
+export const navItems: NavItem[] = [todosConfig, orderEntryNavItem]
