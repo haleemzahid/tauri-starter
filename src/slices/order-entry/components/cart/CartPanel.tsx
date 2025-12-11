@@ -1,18 +1,16 @@
-// CartPanel - Full cart sidebar with items, totals, and action buttons
+// CartPanel - Resizable cart sidebar (composition of header, items, footer)
 
 import { useAtomValue } from 'jotai'
-import { ArrowLeft, LayoutGrid } from 'lucide-react'
 import {
   cartItemsAtom,
   cartTotalsAtom,
   useCartActions,
 } from '../../shared/store'
+import { useResizablePanel } from '../../shared/hooks/useResizablePanel'
+import { CartHeader } from './CartHeader'
 import { CartItemList } from './CartItemList'
-import { TotalsSection } from './TotalsSection'
-import { ServiceMethodSelect } from './ServiceMethodSelect'
-import { CurrentUserBadge } from './CurrentUserBadge'
-import { ConfigurableButton } from '../shared'
-import { formatCurrency } from '../../shared/utils'
+import { CartFooter } from './CartFooter'
+import { ResizeHandle } from '../shared/ResizeHandle'
 import type { CartItem, ServiceMethod } from '../../shared/types'
 
 interface CartPanelProps {
@@ -36,75 +34,39 @@ export function CartPanel({
   const totals = useAtomValue(cartTotalsAtom)
   const { removeItem } = useCartActions()
 
-  const handleRemoveItem = (itemId: string) => {
-    removeItem(itemId)
-  }
-
-  const hasItems = items.length > 0
+  const { width, panelRef, startResize } = useResizablePanel({
+    storageKey: 'cart-panel-width',
+    defaultWidth: 320,
+    minWidth: 280,
+    maxWidth: 500,
+  })
 
   return (
-    <div className="bg-base-100 border-base-300 flex h-full w-80 flex-col border-r">
-      {/* Header Row 1: Back, Customer Type, Tab Name */}
-      <div className="border-base-300 flex items-center gap-2 border-b p-2">
-        <button className="btn btn-ghost btn-sm" onClick={onCancel}>
-          <ArrowLeft className="h-4 w-4" />
-        </button>
-        <span className="font-medium">Walk-In</span>
-        <button className="btn btn-outline btn-sm flex-1">
-          <LayoutGrid className="h-4 w-4" />
-          Tab Name
-        </button>
-      </div>
+    <div
+      ref={panelRef}
+      className="bg-base-100 border-base-300 relative flex h-full flex-col border-r"
+      style={{ width }}
+    >
+      <CartHeader
+        serviceMethod={serviceMethod}
+        onServiceMethodChange={onServiceMethodChange}
+        onCancel={onCancel}
+      />
 
-      {/* Header Row 2: Service Method, Employee */}
-      <div className="border-base-300 flex items-end gap-2 border-b p-2">
-        <ServiceMethodSelect
-          value={serviceMethod}
-          onChange={onServiceMethodChange}
-        />
-        <CurrentUserBadge />
-      </div>
-
-      {/* Header Row 3: Action Buttons */}
-      <div className="border-base-300 flex gap-2 border-b p-2">
-        <ConfigurableButton configName="Svc change" />
-        <ConfigurableButton configName="Split" />
-        <ConfigurableButton configName="Discount" />
-      </div>
-
-      {/* Cart Items */}
       <CartItemList
         items={items}
         onEditItem={onEditItem}
-        onRemoveItem={handleRemoveItem}
+        onRemoveItem={removeItem}
       />
 
-      {/* Stay/Send Buttons */}
-      <div className="border-base-300 grid grid-cols-2 gap-2 border-t p-2">
-        <button className="btn btn-neutral btn-sm" disabled={!hasItems}>
-          Stay
-        </button>
-        <button className="btn btn-neutral btn-sm" disabled={!hasItems}>
-          Send
-        </button>
-      </div>
+      <CartFooter
+        totals={totals}
+        hasItems={items.length > 0}
+        onPay={onPay}
+        onHold={onHold}
+      />
 
-      {/* Totals */}
-      <TotalsSection totals={totals} />
-
-      {/* Bottom Action Buttons */}
-      <div className="grid grid-cols-2 gap-2 p-2">
-        <button className="btn btn-outline btn-sm" onClick={onHold}>
-          No Sale
-        </button>
-        <button
-          className="btn btn-primary btn-sm"
-          onClick={onPay}
-          disabled={!hasItems}
-        >
-          {formatCurrency(totals.grandTotal)}
-        </button>
-      </div>
+      <ResizeHandle onMouseDown={startResize} />
     </div>
   )
 }

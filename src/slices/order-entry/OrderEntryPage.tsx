@@ -82,7 +82,7 @@ export function OrderEntryPage() {
       />
 
       {/* Main content area - RIGHT */}
-      <div className="flex-1 overflow-hidden">
+      <div className="min-h-0 min-w-0 flex-1 overflow-hidden">
         {currentView === 'menu' && (
           <MenuBrowseView onProductSelect={handleProductSelect} />
         )}

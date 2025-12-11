@@ -27,26 +27,33 @@ export function ColoredTile({
   const fgColor = foreColor || '#ffffff'
 
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      disabled={disabled}
-      style={{
-        backgroundColor: bgColor,
-        color: fgColor,
-      }}
+    <div
       className={`
-        flex items-center justify-center
-        min-h-[48px] px-3 py-2
-        rounded-lg font-medium text-sm
-        transition-all duration-150
-        touch-manipulation select-none
-        ${isSelected ? 'ring-2 ring-cyan-400 ring-offset-2 ring-offset-base-100 scale-[0.98]' : ''}
-        ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-110 active:scale-95'}
-        ${className}
+        w-full p-1 rounded-lg
+        ${isSelected ? 'bg-cyan-400' : 'bg-transparent'}
       `}
     >
-      {children}
-    </button>
+      <button
+        type="button"
+        onClick={onClick}
+        disabled={disabled}
+        style={{
+          backgroundColor: bgColor,
+          color: fgColor,
+        }}
+        className={`
+          w-full flex items-center justify-center
+          min-h-[48px] px-3 py-2
+          rounded-md font-medium text-sm
+          border border-base-300
+          transition-all duration-150
+          touch-manipulation select-none
+          ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-110 active:scale-95'}
+          ${className}
+        `}
+      >
+        {children}
+      </button>
+    </div>
   )
 }

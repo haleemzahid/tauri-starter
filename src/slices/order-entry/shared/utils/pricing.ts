@@ -174,6 +174,7 @@ export function calculateCartTotals(
 /**
  * Format currency for display
  */
-export function formatCurrency(amount: number): string {
-  return `$${amount.toFixed(2)}`
+export function formatCurrency(amount: number | string): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  return `$${(num || 0).toFixed(2)}`
 }

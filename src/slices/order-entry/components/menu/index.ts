@@ -1,6 +1,7 @@
 // Menu components - Re-exports
 
 export { MenuColumn } from './MenuColumn'
-export { MenuTile } from './MenuTile'
-export { CategoryTile } from './CategoryTile'
-export { ProductTile } from './ProductTile'
+export { Tile } from './Tile'
+export { MenuTopBar } from './MenuTopBar'
+export { MenuBottomBar } from './MenuBottomBar'
+export { ActionButton } from './ActionButton'

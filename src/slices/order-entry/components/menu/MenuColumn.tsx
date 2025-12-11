@@ -1,24 +1,38 @@
 // Menu Column - Single column in the horizontal menu layout
 
 import type { ReactNode } from 'react'
+import { useUIControl } from '../../shared/hooks/useUIControl'
 
 interface MenuColumnProps {
   title: string
+  configName: string
   children: ReactNode
   isLoading?: boolean
 }
 
 export function MenuColumn({
   title,
+  configName,
   children,
   isLoading = false,
 }: MenuColumnProps) {
+  const { data: config } = useUIControl(configName)
+
+  const headerStyle: React.CSSProperties = {
+    backgroundColor: config?.backColor ?? '#E0E0E0',
+    color: config?.foreColor ?? '#000000',
+    borderColor: config?.backColor ?? '#E0E0E0',
+  }
+
   return (
-    <div className="flex h-full w-[200px] flex-shrink-0 flex-col">
+    <div className="flex h-full min-w-[200px] flex-1 flex-col">
       {/* Column Header */}
-      <div className="mb-2 px-1">
-        <h3 className="text-sm font-semibold text-base-content/70 uppercase tracking-wide">
-          {title}
+      <div
+        className="mb-2 rounded border-2 px-3 py-2 text-center"
+        style={headerStyle}
+      >
+        <h3 className="text-sm font-semibold uppercase tracking-wide">
+          {config?.displayName ?? title}
         </h3>
       </div>
 

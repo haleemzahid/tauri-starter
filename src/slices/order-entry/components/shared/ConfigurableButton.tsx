@@ -9,6 +9,7 @@ interface ConfigurableButtonProps {
   disabled?: boolean
   className?: string
   children?: ReactNode
+  flex?: boolean
 }
 
 export function ConfigurableButton({
@@ -17,6 +18,7 @@ export function ConfigurableButton({
   disabled = false,
   className = '',
   children,
+  flex = true,
 }: ConfigurableButtonProps) {
   const { data: config } = useUIControl(configName)
 
@@ -33,17 +35,17 @@ export function ConfigurableButton({
     style.fontSize = `${config.fontSize}px`
   }
 
-  // Determine button text: use displayName from config, or children, or configName as fallback
-  const buttonText = children ?? config?.displayName ?? configName
+  // Use children if provided, otherwise fall back to displayName or configName
+  const buttonContent = children ?? config?.displayName ?? configName
 
   return (
     <button
-      className={`btn btn-sm flex-1 ${className}`}
+      className={`btn btn-sm ${flex ? 'flex-1' : ''} ${className}`}
       style={style}
       onClick={onClick}
       disabled={disabled}
     >
-      {buttonText}
+      {buttonContent}
     </button>
   )
 }

@@ -38,10 +38,9 @@ export async function getCategoriesByMenuId(
       DisplayName as displayName,
       BackColor as backColor,
       ForeColor as foreColor,
-      OrderNumber as orderNumber,
-      IsActive as isActive
+      OrderNumber as orderNumber
     FROM MenuCategories 
-    WHERE MenuId = $1 AND IsActive = 1 AND IsDeleted = 0
+    WHERE MenuId = $1
     ORDER BY OrderNumber
   `,
     [menuId]
@@ -59,7 +58,8 @@ export async function getProductsByCategoryId(
     `
     SELECT 
       Id as id,
-      MenuCatGuid as menuCategoryId,
+      MenuCategoryId as menuCategoryId,
+      MenuId as menuId,
       Name as name,
       DisplayName as displayName,
       BackColor as backColor,
@@ -68,10 +68,9 @@ export async function getProductsByCategoryId(
       IsTaxed as isTaxed,
       TaxGroupId as taxGroupId,
       OrderNumber as orderNumber,
-      IsActive as isActive,
       AllowedSpecialRequest as allowSpecialRequest
     FROM Products 
-    WHERE MenuCatGuid = $1 AND IsActive = 1 AND IsDeleted = 0
+    WHERE MenuCategoryId = $1
     ORDER BY OrderNumber
   `,
     [categoryId]
@@ -86,21 +85,21 @@ export async function getProductsByMenuId(menuId: string): Promise<Product[]> {
   return db.select<Product[]>(
     `
     SELECT 
-      p.Id as id,
-      p.MenuGuid as menuId,
-      p.Name as name,
-      p.DisplayName as displayName,
-      p.BackColor as backColor,
-      p.ForeColor as foreColor,
-      p.BasePrice as basePrice,
-      p.IsTaxed as isTaxed,
-      p.TaxGroupId as taxGroupId,
-      p.OrderNumber as orderNumber,
-      p.IsActive as isActive,
-      p.AllowedSpecialRequest as allowSpecialRequest
-    FROM Products p
-    WHERE p.MenuGuid = $1 AND p.IsActive = 1 AND p.IsDeleted = 0
-    ORDER BY p.OrderNumber
+      Id as id,
+      MenuCategoryId as menuCategoryId,
+      MenuId as menuId,
+      Name as name,
+      DisplayName as displayName,
+      BackColor as backColor,
+      ForeColor as foreColor,
+      BasePrice as basePrice,
+      IsTaxed as isTaxed,
+      TaxGroupId as taxGroupId,
+      OrderNumber as orderNumber,
+      AllowedSpecialRequest as allowSpecialRequest
+    FROM Products
+    WHERE MenuId = $1
+    ORDER BY OrderNumber
   `,
     [menuId]
   )
@@ -114,6 +113,8 @@ export async function getDirectProducts(): Promise<Product[]> {
   return db.select<Product[]>(`
     SELECT 
       Id as id,
+      MenuCategoryId as menuCategoryId,
+      MenuId as menuId,
       Name as name,
       DisplayName as displayName,
       BackColor as backColor,
@@ -122,12 +123,10 @@ export async function getDirectProducts(): Promise<Product[]> {
       IsTaxed as isTaxed,
       TaxGroupId as taxGroupId,
       OrderNumber as orderNumber,
-      IsActive as isActive,
       AllowedSpecialRequest as allowSpecialRequest
     FROM Products 
-    WHERE (MenuCatGuid IS NULL OR MenuCatGuid = '') 
-      AND (MenuGuid IS NULL OR MenuGuid = '')
-      AND IsActive = 1 AND IsDeleted = 0
+    WHERE (MenuCategoryId IS NULL OR MenuCategoryId = '') 
+      AND (MenuId IS NULL OR MenuId = '')
     ORDER BY OrderNumber
   `)
 }

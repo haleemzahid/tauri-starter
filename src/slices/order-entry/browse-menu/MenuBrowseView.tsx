@@ -1,19 +1,10 @@
 // Menu Browse View - Horizontal columns for menu navigation
 
-import { useState, useCallback } from 'react'
-import {
-  MenuColumn,
-  MenuTile,
-  CategoryTile,
-  ProductTile,
-} from '../components/menu'
+import { useState, useCallback, useEffect } from 'react'
+import { MenuColumn, Tile, MenuTopBar, MenuBottomBar } from '../components/menu'
 import { useMenus } from './useMenus'
 import { useCategories } from './useCategories'
-import {
-  useProductsByCategory,
-  useProductsByMenu,
-  useDirectProducts,
-} from './useProducts'
+import { useProductsByCategory, useProductsByMenu } from './useProducts'
 import type { Menu, MenuCategory, Product } from '../shared/types'
 
 interface MenuBrowseViewProps {
@@ -35,10 +26,22 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
     useProductsByMenu(selectedMenuId)
   const { data: categoryProducts = [], isLoading: categoryProductsLoading } =
     useProductsByCategory(selectedCategoryId)
-  const { data: directProducts = [], isLoading: directProductsLoading } =
-    useDirectProducts()
   // Filter out "No Menu" menus
   const visibleMenus = menus.filter((m) => !m.isNoMenu)
+
+  // Auto-select first menu when menus load
+  useEffect(() => {
+    if (visibleMenus.length > 0 && !selectedMenuId) {
+      setSelectedMenuId(visibleMenus[0].id)
+    }
+  }, [visibleMenus, selectedMenuId])
+
+  // Auto-select first category when categories load
+  useEffect(() => {
+    if (categories.length > 0 && !selectedCategoryId) {
+      setSelectedCategoryId(categories[0].id)
+    }
+  }, [categories, selectedCategoryId])
 
   // Handlers
   const handleMenuSelect = useCallback((menu: Menu) => {
@@ -58,71 +61,88 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
   )
 
   return (
-    <div className="flex h-full gap-4 overflow-x-auto p-4">
-      {/* Column 1: Menus */}
-      <MenuColumn title="Menus" isLoading={menusLoading}>
-        {visibleMenus.map((menu) => (
-          <MenuTile
-            key={menu.id}
-            menu={menu}
-            isSelected={menu.id === selectedMenuId}
-            onClick={() => handleMenuSelect(menu)}
-          />
-        ))}
-      </MenuColumn>
+    <div className="relative flex h-full w-full flex-col overflow-hidden">
+      {/* Top Bar */}
+      <MenuTopBar />
 
-      {/* Column 2: Menu Products (products directly on menu) */}
-      {selectedMenuId && menuProducts.length > 0 && (
-        <MenuColumn title="Menu Items" isLoading={menuProductsLoading}>
-          {menuProducts.map((product) => (
-            <ProductTile
-              key={product.id}
-              product={product}
-              onClick={() => handleProductSelect(product)}
-            />
-          ))}
-        </MenuColumn>
-      )}
+      {/* Main Content */}
+      <div className="min-h-0 min-w-0 flex-1 overflow-x-auto p-4 pb-16">
+        <div className="flex h-full min-w-full gap-2">
+          <MenuColumn title="Menus" configName="Menus" isLoading={menusLoading}>
+            {visibleMenus.map((menu) => (
+              <Tile
+                key={menu.id}
+                item={menu}
+                isSelected={menu.id === selectedMenuId}
+                onClick={() => handleMenuSelect(menu)}
+              />
+            ))}
+          </MenuColumn>
 
-      {/* Column 3: Categories */}
-      {selectedMenuId && categories.length > 0 && (
-        <MenuColumn title="Categories" isLoading={categoriesLoading}>
-          {categories.map((category) => (
-            <CategoryTile
-              key={category.id}
-              category={category}
-              isSelected={category.id === selectedCategoryId}
-              onClick={() => handleCategorySelect(category)}
-            />
-          ))}
-        </MenuColumn>
-      )}
+          {/* Column 2: Menu Products (products directly on menu) */}
+          <MenuColumn
+            title="Menu Items"
+            configName="Menu Products"
+            isLoading={menuProductsLoading}
+          >
+            {menuProducts.map((product) => (
+              <Tile
+                key={product.id}
+                item={product}
+                showPrice
+                onClick={() => handleProductSelect(product)}
+              />
+            ))}
+          </MenuColumn>
 
-      {/* Column 4: Category Products */}
-      {selectedCategoryId && (
-        <MenuColumn title="Products" isLoading={categoryProductsLoading}>
-          {categoryProducts.map((product) => (
-            <ProductTile
-              key={product.id}
-              product={product}
-              onClick={() => handleProductSelect(product)}
-            />
-          ))}
-        </MenuColumn>
-      )}
+          {/* Column 3: Categories (Menu Groups) */}
+          <MenuColumn
+            title="Menu Groups"
+            configName="Menu Groups"
+            isLoading={categoriesLoading}
+          >
+            {categories.length > 0 ? (
+              categories.map((category) => (
+                <Tile
+                  key={category.id}
+                  item={category}
+                  isSelected={category.id === selectedCategoryId}
+                  onClick={() => handleCategorySelect(category)}
+                />
+              ))
+            ) : (
+              <div className="text-base-content/50 py-4 text-center text-sm">
+                No menu groups
+              </div>
+            )}
+          </MenuColumn>
 
-      {/* Column 5: Direct Products (always visible if any exist) */}
-      {directProducts.length > 0 && (
-        <MenuColumn title="Quick Items" isLoading={directProductsLoading}>
-          {directProducts.map((product) => (
-            <ProductTile
-              key={product.id}
-              product={product}
-              onClick={() => handleProductSelect(product)}
-            />
-          ))}
-        </MenuColumn>
-      )}
+          {/* Column 4: Category Products */}
+          <MenuColumn
+            title="Products"
+            configName="Products"
+            isLoading={categoryProductsLoading}
+          >
+            {categoryProducts.length > 0 ? (
+              categoryProducts.map((product) => (
+                <Tile
+                  key={product.id}
+                  item={product}
+                  showPrice
+                  onClick={() => handleProductSelect(product)}
+                />
+              ))
+            ) : (
+              <div className="text-base-content/50 py-4 text-center text-sm">
+                No products
+              </div>
+            )}
+          </MenuColumn>
+        </div>
+      </div>
+
+      {/* Bottom Action Bar */}
+      <MenuBottomBar />
     </div>
   )
 }
