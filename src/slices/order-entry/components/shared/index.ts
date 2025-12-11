@@ -3,3 +3,4 @@
 export { ColoredTile } from './ColoredTile'
 export { QuantityControl } from './QuantityControl'
 export { LoadingOverlay } from './LoadingOverlay'
+export { ConfigurableButton } from './ConfigurableButton'

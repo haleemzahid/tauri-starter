@@ -1,7 +1,7 @@
 // CartPanel - Full cart sidebar with items, totals, and action buttons
 
 import { useAtomValue } from 'jotai'
-import { ArrowLeft, LayoutGrid, Percent } from 'lucide-react'
+import { ArrowLeft, LayoutGrid } from 'lucide-react'
 import {
   cartItemsAtom,
   cartTotalsAtom,
@@ -10,6 +10,8 @@ import {
 import { CartItemList } from './CartItemList'
 import { TotalsSection } from './TotalsSection'
 import { ServiceMethodSelect } from './ServiceMethodSelect'
+import { CurrentUserBadge } from './CurrentUserBadge'
+import { ConfigurableButton } from '../shared'
 import { formatCurrency } from '../../shared/utils'
 import type { CartItem, ServiceMethod } from '../../shared/types'
 
@@ -55,29 +57,19 @@ export function CartPanel({
       </div>
 
       {/* Header Row 2: Service Method, Employee */}
-      <div className="border-base-300 flex items-center gap-2 border-b p-2">
+      <div className="border-base-300 flex items-end gap-2 border-b p-2">
         <ServiceMethodSelect
           value={serviceMethod}
           onChange={onServiceMethodChange}
         />
-        <div className="btn btn-neutral btn-sm">Brian</div>
+        <CurrentUserBadge />
       </div>
 
       {/* Header Row 3: Action Buttons */}
       <div className="border-base-300 flex gap-2 border-b p-2">
-        <button
-          className="btn btn-neutral btn-sm flex-1"
-          onClick={() => {
-            // TODO: Open service method dialog
-          }}
-        >
-          Svc change
-        </button>
-        <button className="btn btn-neutral btn-sm flex-1">Split</button>
-        <button className="btn btn-neutral btn-sm flex-1">
-          <Percent className="h-3 w-3" />
-          Discount
-        </button>
+        <ConfigurableButton configName="Svc change" />
+        <ConfigurableButton configName="Split" />
+        <ConfigurableButton configName="Discount" />
       </div>
 
       {/* Cart Items */}
