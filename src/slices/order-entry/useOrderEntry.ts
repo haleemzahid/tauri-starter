@@ -1,15 +1,19 @@
 // useOrderEntry - State and handlers for order entry page
 
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import {
   useCartActions,
   useSetInvoiceDiscount,
   useSelectedCartItem,
   useModifierSelections,
   useResetModifierSelections,
+  selectedCartItemIdAtom,
+  cartItemsAtom,
 } from './shared/store'
 import { useSetSelectedProduct } from './shared/store/ui-atoms'
 import { getProductWithDetails } from './shared/database/product-queries'
+import { useModifierValidation } from './modifier-view/useModifierValidation'
+import { useSetAtom, useAtomValue } from 'jotai'
 import type {
   Product,
   CartItem,
@@ -32,7 +36,7 @@ function productNeedsModifiers(product: Product): boolean {
 export function useOrderEntry() {
   const [currentView, setCurrentView] = useState<OrderView>('menu')
   const [serviceMethod, setServiceMethod] = useState<ServiceMethod | null>(null)
-  const [pendingProduct, setPendingProduct] = useState<Product | null>(null)
+  const [editingItemId, setEditingItemId] = useState<string | null>(null)
   const [isLoadingProduct, setIsLoadingProduct] = useState(false)
 
   const { addItem, updateItem, removeItem, clearCart, setItemDiscount } =
@@ -40,6 +44,7 @@ export function useOrderEntry() {
   const setInvoiceDiscount = useSetInvoiceDiscount()
   const selectedItem = useSelectedCartItem()
   const setSelectedProduct = useSetSelectedProduct()
+  const setSelectedCartItemId = useSetAtom(selectedCartItemIdAtom)
   const modifierSelections = useModifierSelections()
   const resetModifierSelections = useResetModifierSelections()
 
@@ -58,24 +63,24 @@ export function useOrderEntry() {
           toppingCategories: details.toppingCategories,
         }
 
+        // Always add to cart immediately
+        const newItem: CartItem = {
+          id: crypto.randomUUID(),
+          product: fullProduct,
+          quantity: 1,
+          portions: [],
+          modifiers: [],
+          taxRate: fullProduct.isTaxed ? 0.0825 : 0,
+          specialInstructions: [],
+          createdAt: new Date(),
+        }
+        addItem(newItem)
+
         if (productNeedsModifiers(fullProduct)) {
-          // Store product and show modifier view
-          setPendingProduct(fullProduct)
+          // Show modifier view to configure
+          setEditingItemId(newItem.id)
           setSelectedProduct(fullProduct)
           setCurrentView('modifiers')
-        } else {
-          // Add directly to cart
-          const newItem: CartItem = {
-            id: crypto.randomUUID(),
-            product: fullProduct,
-            quantity: 1,
-            portions: [],
-            modifiers: [],
-            taxRate: fullProduct.isTaxed ? 0.0825 : 0,
-            specialInstructions: [],
-            createdAt: new Date(),
-          }
-          addItem(newItem)
         }
       } finally {
         setIsLoadingProduct(false)
@@ -84,18 +89,25 @@ export function useOrderEntry() {
     [addItem, setSelectedProduct]
   )
 
-  const handleEditItem = useCallback(
+  const handleDoubleClickItem = useCallback(
     (item: CartItem) => {
-      setPendingProduct(item.product)
+      setEditingItemId(item.id)
+      setSelectedCartItemId(item.id)
       setSelectedProduct(item.product)
       setCurrentView('modifiers')
     },
-    [setSelectedProduct]
+    [setSelectedProduct, setSelectedCartItemId]
   )
 
-  // --- Modifier Actions ---
-  const handleModifierConfirm = useCallback(() => {
-    if (!pendingProduct) return
+  // --- Live Cart Updates (when modifiers change) ---
+  const cartItems = useAtomValue(cartItemsAtom)
+
+  useEffect(() => {
+    if (!editingItemId || currentView !== 'modifiers') return
+
+    // Find the item we're editing
+    const currentItem = cartItems.find((item) => item.id === editingItemId)
+    if (!currentItem) return
 
     // Build modifiers array from selections
     const modifiers: CartItemModifier[] = []
@@ -110,9 +122,8 @@ export function useOrderEntry() {
       })
     })
 
-    const newItem: CartItem = {
-      id: crypto.randomUUID(),
-      product: pendingProduct,
+    const updatedItem: CartItem = {
+      ...currentItem,
       quantity: modifierSelections.quantity,
       size: modifierSelections.size ?? undefined,
       type: modifierSelections.type ?? undefined,
@@ -122,44 +133,47 @@ export function useOrderEntry() {
         modifiers: [],
       })),
       modifiers,
-      taxRate: pendingProduct.isTaxed ? 0.0825 : 0,
-      specialInstructions: [],
-      createdAt: new Date(),
     }
 
-    addItem(newItem)
+    updateItem(updatedItem)
+  }, [editingItemId, currentView, modifierSelections, updateItem])
+
+  // --- Modifier Actions ---
+  const handleModifierConfirm = useCallback(() => {
+    // Cart is already updated live, just close the view
     resetModifierSelections()
-    setPendingProduct(null)
+    setEditingItemId(null)
     setSelectedProduct(null)
     setCurrentView('menu')
-  }, [
-    pendingProduct,
-    modifierSelections,
-    addItem,
-    resetModifierSelections,
-    setSelectedProduct,
-  ])
+  }, [resetModifierSelections, setSelectedProduct])
 
   const handleModifierCancel = useCallback(() => {
     resetModifierSelections()
-    setPendingProduct(null)
+    setEditingItemId(null)
     setSelectedProduct(null)
     setCurrentView('menu')
   }, [resetModifierSelections, setSelectedProduct])
 
   const handleModifierDelete = useCallback(() => {
-    // If editing existing item, remove it
-    if (selectedItem) {
-      removeItem(selectedItem.id)
+    // Delete the item being edited
+    if (editingItemId) {
+      removeItem(editingItemId)
     }
     resetModifierSelections()
-    setPendingProduct(null)
+    setEditingItemId(null)
     setSelectedProduct(null)
     setCurrentView('menu')
-  }, [selectedItem, removeItem, resetModifierSelections, setSelectedProduct])
+  }, [editingItemId, removeItem, resetModifierSelections, setSelectedProduct])
+
+  // --- Validation ---
+  const { isValid: isModifierValid } = useModifierValidation()
 
   // --- Order Actions ---
-  const handlePay = useCallback(() => setCurrentView('payment'), [])
+  const handlePay = useCallback(() => {
+    // Block if in modifier view with incomplete selection
+    if (currentView === 'modifiers' && !isModifierValid) return
+    setCurrentView('payment')
+  }, [currentView, isModifierValid])
   const handleHold = useCallback(() => {
     // TODO: Save to hold invoices
   }, [])
@@ -188,7 +202,11 @@ export function useOrderEntry() {
     if (selectedItem) setItemDiscount(selectedItem.id, null)
   }, [setItemDiscount, selectedItem])
 
-  const handleOpenDiscount = useCallback(() => setCurrentView('discount'), [])
+  const handleOpenDiscount = useCallback(() => {
+    // Block if in modifier view with incomplete selection
+    if (currentView === 'modifiers' && !isModifierValid) return
+    setCurrentView('discount')
+  }, [currentView, isModifierValid])
   const handleDiscountDone = useCallback(() => setCurrentView('menu'), [])
 
   return {
@@ -203,7 +221,7 @@ export function useOrderEntry() {
 
     // Product actions
     handleProductSelect,
-    handleEditItem,
+    handleDoubleClickItem,
 
     // Modifier actions
     handleModifierConfirm,

@@ -22,7 +22,15 @@ export function ModifierHeader({
 }: ModifierHeaderProps) {
   const { quantity } = useModifierSelections()
   const setQuantity = useSetQuantity()
-  const { isValid, unsatisfiedGroups } = useModifierValidation()
+  const { isValid, isSizeRequired, unsatisfiedGroups } = useModifierValidation()
+
+  // Build validation message
+  const getValidationMessage = () => {
+    const missing: string[] = []
+    if (isSizeRequired) missing.push('Size')
+    missing.push(...unsatisfiedGroups)
+    return `Select required: ${missing.join(', ')}`
+  }
 
   return (
     <div className="flex items-center justify-between border-b border-base-300 bg-base-100 px-4 py-2">
@@ -65,7 +73,8 @@ export function ModifierHeader({
         <button
           className="btn btn-ghost btn-sm"
           onClick={onCancel}
-          title="Cancel"
+          disabled={!isValid}
+          title={isValid ? 'Done' : getValidationMessage()}
         >
           <X className="h-5 w-5" />
         </button>
@@ -73,11 +82,7 @@ export function ModifierHeader({
           className="btn btn-primary btn-sm"
           onClick={onConfirm}
           disabled={!isValid}
-          title={
-            isValid
-              ? 'Add to cart'
-              : `Select required: ${unsatisfiedGroups.join(', ')}`
-          }
+          title={isValid ? 'Confirm' : getValidationMessage()}
         >
           <Check className="h-5 w-5" />
         </button>

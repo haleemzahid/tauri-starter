@@ -1,4 +1,4 @@
-// useModifierValidation - Checks if mandatory groups are satisfied
+// useModifierValidation - Checks if size and mandatory groups are satisfied
 
 import { useMemo } from 'react'
 import { useSelectedProduct } from '../shared/store/ui-atoms'
@@ -6,12 +6,13 @@ import { useModifierSelections } from '../shared/store/modifier-atoms'
 
 export interface ValidationResult {
   isValid: boolean
+  isSizeRequired: boolean
   unsatisfiedGroups: string[] // Category names that need selection
   unsatisfiedGroupIds: string[]
 }
 
 /**
- * Hook to validate if all mandatory modifier groups have selections.
+ * Hook to validate if size is selected and all mandatory modifier groups have selections.
  */
 export function useModifierValidation(): ValidationResult {
   const product = useSelectedProduct()
@@ -21,8 +22,12 @@ export function useModifierValidation(): ValidationResult {
     const unsatisfiedGroups: string[] = []
     const unsatisfiedGroupIds: string[] = []
 
+    // Check if size is required
+    const hasSizes = (product?.assignedSizes?.length ?? 0) > 0
+    const isSizeRequired = hasSizes && !selections.size
+
     if (!product?.toppingCategories) {
-      return { isValid: true, unsatisfiedGroups, unsatisfiedGroupIds }
+      return { isValid: !isSizeRequired, isSizeRequired, unsatisfiedGroups, unsatisfiedGroupIds }
     }
 
     for (const category of product.toppingCategories) {
@@ -36,7 +41,8 @@ export function useModifierValidation(): ValidationResult {
     }
 
     return {
-      isValid: unsatisfiedGroups.length === 0,
+      isValid: !isSizeRequired && unsatisfiedGroups.length === 0,
+      isSizeRequired,
       unsatisfiedGroups,
       unsatisfiedGroupIds,
     }

@@ -16,7 +16,7 @@ import type { CartItem, ServiceMethod } from '../../shared/types'
 interface CartPanelProps {
   serviceMethod: ServiceMethod | null
   onServiceMethodChange: (method: ServiceMethod | null) => void
-  onEditItem: (item: CartItem) => void
+  onDoubleClickItem: (item: CartItem) => void
   onPay: () => void
   onHold: () => void
   onCancel: () => void
@@ -26,7 +26,7 @@ interface CartPanelProps {
 export function CartPanel({
   serviceMethod,
   onServiceMethodChange,
-  onEditItem,
+  onDoubleClickItem,
   onPay,
   onHold,
   onCancel,
@@ -34,7 +34,7 @@ export function CartPanel({
 }: CartPanelProps) {
   const items = useAtomValue(cartItemsAtom)
   const totals = useAtomValue(cartTotalsAtom)
-  const { removeItem } = useCartActions()
+  const { removeItem, removeModifier } = useCartActions()
 
   const { width, panelRef, startResize } = useResizablePanel({
     storageKey: 'cart-panel-width',
@@ -58,8 +58,9 @@ export function CartPanel({
 
       <CartItemList
         items={items}
-        onEditItem={onEditItem}
+        onDoubleClickItem={onDoubleClickItem}
         onRemoveItem={removeItem}
+        onRemoveModifier={removeModifier}
       />
 
       <CartFooter

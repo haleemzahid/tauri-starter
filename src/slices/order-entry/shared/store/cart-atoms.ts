@@ -1,5 +1,6 @@
 // Cart State Atoms
 
+import { useMemo } from 'react'
 import { atom, useAtomValue, useSetAtom } from 'jotai'
 import { atomWithReducer } from 'jotai/utils'
 import type {
@@ -198,52 +199,55 @@ export function useCartActions() {
   const dispatch = useSetAtom(cartItemsAtom)
   const setSelectedId = useSetAtom(selectedCartItemIdAtom)
 
-  return {
-    addItem: (item: CartItem) => {
-      dispatch({ type: 'ADD_ITEM', item })
-      setSelectedId(item.id)
-    },
-    removeItem: (itemId: string) => {
-      dispatch({ type: 'REMOVE_ITEM', itemId })
-      setSelectedId(null)
-    },
-    updateQuantity: (itemId: string, quantity: number) => {
-      dispatch({ type: 'UPDATE_QUANTITY', itemId, quantity })
-    },
-    updateItem: (item: CartItem) => {
-      dispatch({ type: 'UPDATE_ITEM', item })
-    },
-    addModifier: (
-      itemId: string,
-      modifier: CartItemModifier,
-      portionId?: string
-    ) => {
-      dispatch({ type: 'ADD_MODIFIER', itemId, portionId, modifier })
-    },
-    removeModifier: (
-      itemId: string,
-      modifierId: string,
-      portionId?: string
-    ) => {
-      dispatch({ type: 'REMOVE_MODIFIER', itemId, portionId, modifierId })
-    },
-    setItemDiscount: (itemId: string, discount: Discount | null) => {
-      dispatch({ type: 'SET_ITEM_DISCOUNT', itemId, discount })
-    },
-    setItemTaxFree: (itemId: string, isTaxFree: boolean) => {
-      dispatch({ type: 'SET_ITEM_TAX_FREE', itemId, isTaxFree })
-    },
-    clearCart: () => {
-      dispatch({ type: 'CLEAR_CART' })
-      setSelectedId(null)
-    },
-    loadCart: (items: CartItem[]) => {
-      dispatch({ type: 'LOAD_CART', items })
-    },
-    selectItem: (itemId: string | null) => {
-      setSelectedId(itemId)
-    },
-  }
+  return useMemo(
+    () => ({
+      addItem: (item: CartItem) => {
+        dispatch({ type: 'ADD_ITEM', item })
+        setSelectedId(item.id)
+      },
+      removeItem: (itemId: string) => {
+        dispatch({ type: 'REMOVE_ITEM', itemId })
+        setSelectedId(null)
+      },
+      updateQuantity: (itemId: string, quantity: number) => {
+        dispatch({ type: 'UPDATE_QUANTITY', itemId, quantity })
+      },
+      updateItem: (item: CartItem) => {
+        dispatch({ type: 'UPDATE_ITEM', item })
+      },
+      addModifier: (
+        itemId: string,
+        modifier: CartItemModifier,
+        portionId?: string
+      ) => {
+        dispatch({ type: 'ADD_MODIFIER', itemId, portionId, modifier })
+      },
+      removeModifier: (
+        itemId: string,
+        modifierId: string,
+        portionId?: string
+      ) => {
+        dispatch({ type: 'REMOVE_MODIFIER', itemId, portionId, modifierId })
+      },
+      setItemDiscount: (itemId: string, discount: Discount | null) => {
+        dispatch({ type: 'SET_ITEM_DISCOUNT', itemId, discount })
+      },
+      setItemTaxFree: (itemId: string, isTaxFree: boolean) => {
+        dispatch({ type: 'SET_ITEM_TAX_FREE', itemId, isTaxFree })
+      },
+      clearCart: () => {
+        dispatch({ type: 'CLEAR_CART' })
+        setSelectedId(null)
+      },
+      loadCart: (items: CartItem[]) => {
+        dispatch({ type: 'LOAD_CART', items })
+      },
+      selectItem: (itemId: string | null) => {
+        setSelectedId(itemId)
+      },
+    }),
+    [dispatch, setSelectedId]
+  )
 }
 
 // Session state setters

@@ -6,14 +6,16 @@ import type { CartItem } from '../../shared/types'
 
 interface CartItemListProps {
   items: CartItem[]
-  onEditItem: (item: CartItem) => void
+  onDoubleClickItem: (item: CartItem) => void
   onRemoveItem: (itemId: string) => void
+  onRemoveModifier?: (itemId: string, modifierId: string) => void
 }
 
 export function CartItemList({
   items,
-  onEditItem,
+  onDoubleClickItem,
   onRemoveItem,
+  onRemoveModifier,
 }: CartItemListProps) {
   const selectedItem = useSelectedCartItem()
   const { selectItem } = useCartActions()
@@ -39,8 +41,9 @@ export function CartItemList({
           item={item}
           isSelected={selectedItem?.id === item.id}
           onSelect={handleSelect}
-          onEdit={onEditItem}
+          onDoubleClick={onDoubleClickItem}
           onRemove={onRemoveItem}
+          onRemoveModifier={onRemoveModifier}
         />
       ))}
     </div>

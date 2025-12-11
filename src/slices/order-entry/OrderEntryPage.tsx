@@ -13,7 +13,7 @@ export function OrderEntryPage() {
     selectedItem,
     setServiceMethod,
     handleProductSelect,
-    handleEditItem,
+    handleDoubleClickItem,
     handleModifierConfirm,
     handleModifierCancel,
     handleModifierDelete,
@@ -33,7 +33,7 @@ export function OrderEntryPage() {
       <CartPanel
         serviceMethod={serviceMethod}
         onServiceMethodChange={setServiceMethod}
-        onEditItem={handleEditItem}
+        onDoubleClickItem={handleDoubleClickItem}
         onPay={handlePay}
         onHold={handleHold}
         onCancel={handleCancel}

@@ -5,7 +5,7 @@ import { useMenuBrowse } from './useMenuBrowse'
 import type { Product } from '../shared/types'
 
 interface MenuBrowseViewProps {
-  onProductSelect: (product: Product) => void
+  onProductSelect: (product: Product) => void | Promise<void>
 }
 
 export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
