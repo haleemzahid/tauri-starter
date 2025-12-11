@@ -9,12 +9,13 @@ import {
 } from '../../shared/store'
 import { CartItemList } from './CartItemList'
 import { TotalsSection } from './TotalsSection'
+import { ServiceMethodSelect } from './ServiceMethodSelect'
 import { formatCurrency } from '../../shared/utils'
 import type { CartItem, ServiceMethod } from '../../shared/types'
 
 interface CartPanelProps {
   serviceMethod: ServiceMethod | null
-  onServiceMethodChange: () => void
+  onServiceMethodChange: (method: ServiceMethod | null) => void
   onEditItem: (item: CartItem) => void
   onPay: () => void
   onHold: () => void
@@ -55,16 +56,10 @@ export function CartPanel({
 
       {/* Header Row 2: Service Method, Employee */}
       <div className="border-base-300 flex items-center gap-2 border-b p-2">
-        <div className="flex-1">
-          <label className="text-xs text-base-content/60">Service Methods</label>
-          <select
-            className="select select-bordered select-sm w-full"
-            value={serviceMethod?.id ?? ''}
-            onChange={onServiceMethodChange}
-          >
-            <option value="">Select...</option>
-          </select>
-        </div>
+        <ServiceMethodSelect
+          value={serviceMethod}
+          onChange={onServiceMethodChange}
+        />
         <div className="btn btn-neutral btn-sm">Brian</div>
       </div>
 
@@ -72,7 +67,9 @@ export function CartPanel({
       <div className="border-base-300 flex gap-2 border-b p-2">
         <button
           className="btn btn-neutral btn-sm flex-1"
-          onClick={onServiceMethodChange}
+          onClick={() => {
+            // TODO: Open service method dialog
+          }}
         >
           Svc change
         </button>

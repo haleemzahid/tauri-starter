@@ -26,11 +26,9 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="drawer lg:drawer-open">
-        {/* Page content */}
-        <div className="p-4 lg:p-8">{children}</div>
-      </div>
+    <div className="drawer lg:drawer-open h-screen">
+      {/* Page content */}
+      <div className="flex h-full flex-col">{children}</div>
+    </div>
   )
-
-  
 }

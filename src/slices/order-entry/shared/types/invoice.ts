@@ -137,7 +137,6 @@ export interface ServiceMethod {
   name: string
   displayName?: string
   orderNumber: number
-  isActive: boolean
 }
 
 export interface TaxRate {

@@ -12,9 +12,7 @@ export function OrderEntryPage() {
   const [currentView, setCurrentView] = useState<View>('menu')
   const [_selectedProduct, setSelectedProduct] = useState<Product | null>(null)
   const [_editingItem, setEditingItem] = useState<CartItem | null>(null)
-  const [serviceMethod, _setServiceMethod] = useState<ServiceMethod | null>(
-    null
-  )
+  const [serviceMethod, setServiceMethod] = useState<ServiceMethod | null>(null)
 
   const { addItem, clearCart } = useCartActions()
 
@@ -46,10 +44,12 @@ export function OrderEntryPage() {
   }, [])
 
   // Handle service method change
-  const handleServiceMethodChange = useCallback(() => {
-    // TODO: Show service method picker dialog
-    console.log('Change service method')
-  }, [])
+  const handleServiceMethodChange = useCallback(
+    (method: ServiceMethod | null) => {
+      setServiceMethod(method)
+    },
+    []
+  )
 
   // Handle pay button
   const handlePay = useCallback(() => {
@@ -70,7 +70,7 @@ export function OrderEntryPage() {
   }, [clearCart])
 
   return (
-    <div className="flex h-full">
+    <div className="flex h-full min-h-0 flex-1">
       {/* Cart sidebar - LEFT */}
       <CartPanel
         serviceMethod={serviceMethod}

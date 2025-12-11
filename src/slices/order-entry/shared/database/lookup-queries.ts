@@ -19,10 +19,8 @@ export async function getServiceMethods(): Promise<ServiceMethod[]> {
       Id as id,
       Name as name,
       DisplayName as displayName,
-      OrderNumber as orderNumber,
-      IsActive as isActive
+      OrderNumber as orderNumber
     FROM ServiceMethods 
-    WHERE IsActive = 1 AND IsDeleted = 0
     ORDER BY OrderNumber
   `)
 }
