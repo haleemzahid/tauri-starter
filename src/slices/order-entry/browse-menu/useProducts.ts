@@ -1,6 +1,6 @@
 // useProducts hook - Fetch products for a category or menu
 
-import { useQuery } from '@tanstack/react-query'
+import { useQuery, keepPreviousData } from '@tanstack/react-query'
 import {
   getProductsByCategoryId,
   getProductsByMenuId,
@@ -14,6 +14,7 @@ export function useProductsByCategory(categoryId: string | null) {
       categoryId ? getProductsByCategoryId(categoryId) : Promise.resolve([]),
     enabled: !!categoryId,
     staleTime: 5 * 60 * 1000,
+    placeholderData: keepPreviousData,
   })
 }
 

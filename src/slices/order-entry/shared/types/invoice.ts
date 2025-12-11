@@ -9,6 +9,27 @@ import type {
   Affix,
 } from './menu'
 
+// === Discount Types ===
+
+/**
+ * Discount type enum matching C# DiscountType
+ * 0 = Other, 1 = ItemDiscount, 2 = InvoiceDiscount,
+ * 3 = ProductDiscount, 4 = SubTotalDiscount, 5 = DateRangeDiscount
+ */
+export type DiscountType = 0 | 1 | 2 | 3 | 4 | 5
+
+export interface Discount {
+  id: string
+  name: string
+  displayName?: string
+  discountPercentage: number // Value of discount (percentage)
+  type: DiscountType
+  isForWholeInvoice: boolean // true = apply to invoice, false = apply to item
+  backColor: string
+  foreColor: string
+  orderNumber: number
+}
+
 // === Cart Types (In-Memory State) ===
 
 export interface CartItem {
@@ -19,7 +40,7 @@ export interface CartItem {
   type?: ProductType
   portions: CartItemPortion[]
   modifiers: CartItemModifier[]
-  itemDiscount?: CartDiscount
+  itemDiscount?: Discount
   taxRate: number
   isTaxFree?: boolean // Item-level tax exemption (Make Tax Free action)
   specialInstructions: string[]
@@ -37,15 +58,6 @@ export interface CartItemModifier {
   topping: Topping
   affix?: Affix // "No", "Extra", "Light"
   quantity: number
-}
-
-export interface CartDiscount {
-  id: string
-  name: string
-  discountType: 'percentage' | 'fixed'
-  discountValue: number
-  isForInvoice: boolean
-  isForItem: boolean
 }
 
 export interface CartTotals {
@@ -157,18 +169,4 @@ export interface Customer {
   phone?: string
   email?: string
   isTaxExempt: boolean
-}
-
-// === Discount Types ===
-
-export interface Discount {
-  id: string
-  name: string
-  displayName?: string
-  discountType: 'percentage' | 'fixed'
-  discountValue: number
-  isForInvoice: boolean
-  isForItem: boolean
-  orderNumber: number
-  isActive: boolean
 }

@@ -44,7 +44,7 @@ export async function getPaymentMethods(): Promise<PaymentMethod[]> {
 }
 
 /**
- * Get all discounts
+ * Get all discounts from InvoiceDiscounts table
  */
 export async function getDiscounts(): Promise<Discount[]> {
   const db = await getDatabase()
@@ -53,14 +53,13 @@ export async function getDiscounts(): Promise<Discount[]> {
       Id as id,
       Name as name,
       DisplayName as displayName,
-      DiscountType as discountType,
-      DiscountValue as discountValue,
-      IsForInvoice as isForInvoice,
-      IsForItem as isForItem,
-      OrderNumber as orderNumber,
-      IsActive as isActive
-    FROM Discounts 
-    WHERE IsActive = 1 AND IsDeleted = 0
+      DiscountPercentage as discountPercentage,
+      Type as type,
+      IsForWholeInvoice as isForWholeInvoice,
+      BackColor as backColor,
+      ForeColor as foreColor,
+      OrderNumber as orderNumber
+    FROM InvoiceDiscounts 
     ORDER BY OrderNumber
   `)
 }

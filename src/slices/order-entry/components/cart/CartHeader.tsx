@@ -10,12 +10,14 @@ interface CartHeaderProps {
   serviceMethod: ServiceMethod | null
   onServiceMethodChange: (method: ServiceMethod | null) => void
   onCancel: () => void
+  onDiscount: () => void
 }
 
 export function CartHeader({
   serviceMethod,
   onServiceMethodChange,
   onCancel,
+  onDiscount,
 }: CartHeaderProps) {
   return (
     <>
@@ -44,7 +46,7 @@ export function CartHeader({
       <div className="border-base-300 flex gap-2 border-b p-2">
         <ConfigurableButton configName="Svc change" />
         <ConfigurableButton configName="Split" />
-        <ConfigurableButton configName="Discount" />
+        <ConfigurableButton configName="Discount" onClick={onDiscount} />
       </div>
     </>
   )

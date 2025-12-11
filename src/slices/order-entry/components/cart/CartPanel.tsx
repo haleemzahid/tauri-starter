@@ -20,6 +20,7 @@ interface CartPanelProps {
   onPay: () => void
   onHold: () => void
   onCancel: () => void
+  onDiscount: () => void
 }
 
 export function CartPanel({
@@ -29,6 +30,7 @@ export function CartPanel({
   onPay,
   onHold,
   onCancel,
+  onDiscount,
 }: CartPanelProps) {
   const items = useAtomValue(cartItemsAtom)
   const totals = useAtomValue(cartTotalsAtom)
@@ -51,6 +53,7 @@ export function CartPanel({
         serviceMethod={serviceMethod}
         onServiceMethodChange={onServiceMethodChange}
         onCancel={onCancel}
+        onDiscount={onDiscount}
       />
 
       <CartItemList

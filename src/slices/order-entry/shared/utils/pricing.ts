@@ -61,13 +61,10 @@ export function calculateItemDiscount(item: CartItem): number {
   if (!item.itemDiscount) return 0
 
   const linePrice = calculateItemLinePrice(item)
-
-  if (item.itemDiscount.discountType === 'percentage') {
-    return (linePrice / 100) * item.itemDiscount.discountValue
-  } else {
-    // Fixed discount
-    return Math.min(item.itemDiscount.discountValue, linePrice)
-  }
+  // discountPercentage comes from SQLite as TEXT, parse to number
+  const discountPct =
+    parseFloat(String(item.itemDiscount.discountPercentage)) || 0
+  return (linePrice / 100) * discountPct
 }
 
 /**
@@ -106,10 +103,7 @@ export function calculateItemGrandTotal(
  */
 export function calculateInvoiceDiscount(
   items: CartItem[],
-  invoiceDiscount: {
-    discountType: 'percentage' | 'fixed'
-    discountValue: number
-  } | null
+  invoiceDiscount: { discountPercentage: number } | null
 ): number {
   if (!invoiceDiscount) return 0
 
@@ -123,11 +117,10 @@ export function calculateInvoiceDiscount(
   )
   const afterItemDiscounts = subTotal - itemDiscounts
 
-  if (invoiceDiscount.discountType === 'percentage') {
-    return (afterItemDiscounts / 100) * invoiceDiscount.discountValue
-  } else {
-    return Math.min(invoiceDiscount.discountValue, afterItemDiscounts)
-  }
+  // discountPercentage comes from SQLite as TEXT, parse to number
+  const discountPct =
+    parseFloat(String(invoiceDiscount.discountPercentage)) || 0
+  return (afterItemDiscounts / 100) * discountPct
 }
 
 /**
@@ -136,10 +129,7 @@ export function calculateInvoiceDiscount(
 export function calculateCartTotals(
   items: CartItem[],
   isTaxExempt: boolean,
-  invoiceDiscount: {
-    discountType: 'percentage' | 'fixed'
-    discountValue: number
-  } | null = null,
+  invoiceDiscount: { discountPercentage: number } | null = null,
   tenderAmount = 0
 ): CartTotals {
   const itemCount = items.reduce((sum, item) => sum + item.quantity, 0)

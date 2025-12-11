@@ -13,7 +13,8 @@ interface CartItemRowProps {
 }
 
 // Style classes extracted for readability
-const baseStyles = 'flex cursor-pointer flex-col border-b border-base-300 py-2 px-1 transition-colors'
+const baseStyles =
+  'flex cursor-pointer flex-col border-b border-base-300 py-2 px-1 transition-colors'
 const hoverStyles = 'hover:bg-base-200'
 const selectedStyles = 'bg-base-200'
 const unselectedStyles = ''
@@ -29,6 +30,11 @@ export function CartItemRow({
     item.modifiers.length > 0 ||
     item.portions.some((p) => p.modifiers.length > 0)
   const lineTotal = calculateItemLinePrice(item)
+
+  // Format discount percentage if applied
+  const discountSuffix = item.itemDiscount
+    ? ` (${parseFloat(String(item.itemDiscount.discountPercentage)).toFixed(1)}%)`
+    : ''
 
   const rowClassName = [
     baseStyles,
@@ -49,6 +55,7 @@ export function CartItemRow({
         <div className="flex-1">
           <span className="font-medium">
             {item.product.displayName ?? item.product.name}
+            {discountSuffix}
           </span>
           {item.size && (
             <span className="text-base-content/70 ml-1 text-sm">
@@ -104,13 +111,6 @@ export function CartItemRow({
               </div>
             ))
           )}
-        </div>
-      )}
-
-      {/* Item discount if any */}
-      {item.itemDiscount && (
-        <div className="text-success ml-10 text-sm">
-          Discount: {item.itemDiscount.name}
         </div>
       )}
     </div>
