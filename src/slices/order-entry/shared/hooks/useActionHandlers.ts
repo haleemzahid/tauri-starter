@@ -1,63 +1,47 @@
 // Action Handlers - Centralized logic for order entry action buttons
 
 import { useCallback, useState } from 'react'
+import { useOrderMachineContext } from '../machines/orderMachineContext'
 import {
-  useIsTaxExempt,
-  useSetIsTaxExempt,
   useSelectedCartItem,
   useCartActions,
-  useSetInvoiceDiscount,
-} from '../store'
+  useSessionActions,
+} from '../machines'
 import type { ActionType } from '../types/order-entry-action'
 import type { CartItem } from '../types'
 
 export function useActionHandlers() {
-  const isTaxExempt = useIsTaxExempt()
-  const setIsTaxExempt = useSetIsTaxExempt()
+  const { context } = useOrderMachineContext()
+  const isTaxExempt = context.isTaxExempt
   const selectedItem = useSelectedCartItem()
-  const setInvoiceDiscount = useSetInvoiceDiscount()
-  const {
-    addItem,
-    removeItem,
-    updateQuantity,
-    setItemTaxFree,
-    setItemDiscount,
-    selectItem,
-    clearCart,
-  } = useCartActions()
+  const { removeItem, setItemDiscount } = useCartActions()
+  const { setInvoiceDiscount, setTaxExempt } = useSessionActions()
+
+  const { send } = useOrderMachineContext()
 
   // Confirmation dialog state for CancelOrder
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)
 
   const duplicateItem = useCallback(
     (item: CartItem) => {
-      const duplicate: CartItem = {
-        ...item,
-        id: crypto.randomUUID(),
-        createdAt: new Date(),
-      }
-      addItem(duplicate)
+      send({ type: 'DUPLICATE_ITEM', itemId: item.id })
     },
-    [addItem]
-  )
-
-  const deleteItem = useCallback(
-    (itemId: string) => {
-      removeItem(itemId)
-      selectItem(null)
-    },
-    [removeItem, selectItem]
+    [send]
   )
 
   const handleAction = useCallback(
     (actionType: ActionType) => {
       switch (actionType) {
         case 'TaxExempt':
-          setIsTaxExempt(!isTaxExempt)
+          setTaxExempt(!isTaxExempt)
           break
         case 'MakeTaxFree':
           if (selectedItem) {
-            setItemTaxFree(selectedItem.id, !selectedItem.isTaxFree)
+            send({
+              type: 'SET_ITEM_TAX_FREE',
+              itemId: selectedItem.id,
+              isTaxFree: !selectedItem.isTaxFree,
+            })
           }
           break
         case 'DuplicateItem':
@@ -67,20 +51,30 @@ export function useActionHandlers() {
           break
         case 'RemoveItem':
           if (selectedItem) {
-            deleteItem(selectedItem.id)
+            removeItem(selectedItem.id)
+            send({ type: 'SELECT_CART_ITEM', itemId: null })
           }
           break
         case 'IncreaseQuantity':
           if (selectedItem) {
-            updateQuantity(selectedItem.id, selectedItem.quantity + 1)
+            send({
+              type: 'SET_ITEM_QUANTITY',
+              itemId: selectedItem.id,
+              quantity: selectedItem.quantity + 1,
+            })
           }
           break
         case 'DecreaseQuantity':
           if (selectedItem) {
             if (selectedItem.quantity <= 1) {
-              deleteItem(selectedItem.id)
+              removeItem(selectedItem.id)
+              send({ type: 'SELECT_CART_ITEM', itemId: null })
             } else {
-              updateQuantity(selectedItem.id, selectedItem.quantity - 1)
+              send({
+                type: 'SET_ITEM_QUANTITY',
+                itemId: selectedItem.id,
+                quantity: selectedItem.quantity - 1,
+              })
             }
           }
           break
@@ -97,28 +91,26 @@ export function useActionHandlers() {
           setShowCancelConfirm(true)
           break
         default:
-          // eslint-disable-next-line no-console
           console.warn(`Action not implemented: ${actionType}`)
       }
     },
     [
       isTaxExempt,
-      setIsTaxExempt,
+      setTaxExempt,
       selectedItem,
-      setItemTaxFree,
       setItemDiscount,
       setInvoiceDiscount,
       duplicateItem,
-      deleteItem,
-      updateQuantity,
+      removeItem,
+      send,
     ]
   )
 
   // Cancel order confirmation handlers
   const confirmCancelOrder = useCallback(() => {
-    clearCart()
+    send({ type: 'CANCEL_ORDER' })
     setShowCancelConfirm(false)
-  }, [clearCart])
+  }, [send])
 
   const dismissCancelOrder = useCallback(() => {
     setShowCancelConfirm(false)

@@ -32,6 +32,12 @@ export interface Discount {
 
 // === Cart Types (In-Memory State) ===
 
+export interface SpecialRequest {
+  id: string
+  description: string
+  price: number
+}
+
 export interface CartItem {
   id: string // UUID for this cart item instance
   product: Product
@@ -44,6 +50,7 @@ export interface CartItem {
   taxRate: number
   isTaxFree?: boolean // Item-level tax exemption (Make Tax Free action)
   specialInstructions: string[]
+  specialRequests: SpecialRequest[]
   createdAt: Date
 }
 

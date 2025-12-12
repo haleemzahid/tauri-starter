@@ -1,28 +1,26 @@
 // CartItemList - Scrollable list of cart items
 
 import { CartItemRow } from './CartItemRow'
-import { useSelectedCartItem, useCartActions } from '../../shared/store'
+import { useSelectedCartItemId, useSelectCartItem } from '../../shared/machines'
 import type { CartItem } from '../../shared/types'
 
 interface CartItemListProps {
   items: CartItem[]
   onDoubleClickItem: (item: CartItem) => void
   onRemoveItem: (itemId: string) => void
-  onRemoveModifier?: (itemId: string, modifierId: string) => void
 }
 
 export function CartItemList({
   items,
   onDoubleClickItem,
   onRemoveItem,
-  onRemoveModifier,
 }: CartItemListProps) {
-  const selectedItem = useSelectedCartItem()
-  const { selectItem } = useCartActions()
+  const selectedId = useSelectedCartItemId()
+  const selectCartItem = useSelectCartItem()
 
   const handleSelect = (item: CartItem) => {
     // Toggle selection if clicking the same item
-    selectItem(selectedItem?.id === item.id ? null : item.id)
+    selectCartItem(selectedId === item.id ? null : item.id)
   }
 
   if (items.length === 0) {
@@ -39,11 +37,10 @@ export function CartItemList({
         <CartItemRow
           key={item.id}
           item={item}
-          isSelected={selectedItem?.id === item.id}
+          isSelected={selectedId === item.id}
           onSelect={handleSelect}
           onDoubleClick={onDoubleClickItem}
           onRemove={onRemoveItem}
-          onRemoveModifier={onRemoveModifier}
         />
       ))}
     </div>

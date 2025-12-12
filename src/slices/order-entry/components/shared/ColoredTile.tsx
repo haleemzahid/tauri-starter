@@ -4,8 +4,8 @@
 import { type ReactNode } from 'react'
 
 interface ColoredTileProps {
-  backColor: string
-  foreColor: string
+  backColor?: string | null
+  foreColor?: string | null
   children: ReactNode
   isSelected?: boolean
   onClick?: () => void

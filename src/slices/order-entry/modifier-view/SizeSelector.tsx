@@ -1,25 +1,27 @@
-// SizeSelector - Grid of size buttons
+// SizeSelector - Grid of size buttons (reads from cart item, writes via machine)
 
 import { cn } from '@/slices/shared/utils/cn'
-import { useSelectedProduct } from '../shared/store/ui-atoms'
 import {
-  useModifierSelections,
-  useSetSelectedSize,
-} from '../shared/store/modifier-atoms'
-import { useModifierNavigation } from './useModifierNavigation'
+  useEditingItem,
+  useEditingProduct,
+  useModifierActions,
+} from '../shared/machines'
 import type { AssignedSize } from '../shared/types'
 
-export function SizeSelector() {
-  const product = useSelectedProduct()
-  const { sizeId } = useModifierSelections()
-  const setSize = useSetSelectedSize()
-  const { advanceAfterSize } = useModifierNavigation()
+interface SizeSelectorProps {
+  onAdvance: () => void
+}
+
+export function SizeSelector({ onAdvance }: SizeSelectorProps) {
+  const product = useEditingProduct()
+  const item = useEditingItem()
+  const { setSize } = useModifierActions()
 
   const sizes = product?.assignedSizes?.filter((s) => s.isAssigned) ?? []
 
   if (sizes.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-base-content/50">
+      <div className="text-base-content/50 flex h-full items-center justify-center">
         No sizes available
       </div>
     )
@@ -27,14 +29,15 @@ export function SizeSelector() {
 
   const handleSelect = (size: AssignedSize) => {
     setSize(size)
-    advanceAfterSize()
+    onAdvance()
   }
 
   return (
     <div className="p-4">
       <div className="grid grid-cols-3 gap-3">
         {sizes.map((size) => {
-          const isSelected = sizeId === size.id
+          // Read selected size from cart item
+          const isSelected = item?.size?.id === size.id
 
           return (
             <button

@@ -1,12 +1,7 @@
-// ModifierView - Main container for product configuration
+// ModifierView - Main container for product configuration (XState powered)
 
-import { useEffect } from 'react'
-import {
-  useSelectedProduct,
-  useSetSelectedModifierTab,
-} from '../shared/store/ui-atoms'
-import { useResetModifierSelections } from '../shared/store/modifier-atoms'
-import { useModifierNavigation } from './useModifierNavigation'
+import { useState, useEffect } from 'react'
+import { useEditingItem, useEditingProduct } from '../shared/machines'
 import { ModifierHeader } from './ModifierHeader'
 import { ModifierTabs } from './ModifierTabs'
 import { SizeSelector } from './SizeSelector'
@@ -14,6 +9,14 @@ import { TypeSelector } from './TypeSelector'
 import { PortionSelector } from './PortionSelector'
 import { ModifierGroupSelector } from './ModifierGroupSelector'
 import { ToppingGrid } from './ToppingGrid'
+import type { ToppingCategory } from '../shared/types'
+
+export type ModifierTab =
+  | 'sizes'
+  | 'types'
+  | 'portions'
+  | 'modifier-groups'
+  | 'modifiers'
 
 interface ModifierViewProps {
   onConfirm: () => void
@@ -26,32 +29,70 @@ export function ModifierView({
   onCancel,
   onDelete,
 }: ModifierViewProps) {
-  const product = useSelectedProduct()
-  const resetSelections = useResetModifierSelections()
-  const setTab = useSetSelectedModifierTab()
-  const { currentTab, getFirstTab } = useModifierNavigation()
+  const product = useEditingProduct()
+  const item = useEditingItem()
+  const [currentTab, setCurrentTab] = useState<ModifierTab>('sizes')
+  const [activeCategory, setActiveCategory] = useState<ToppingCategory | null>(
+    null
+  )
 
-  // Reset selections and set initial tab when product changes
+  // Determine available tabs based on product
+  const availableTabs: ModifierTab[] = []
+  if (product?.assignedSizes && product.assignedSizes.length > 0) {
+    availableTabs.push('sizes')
+  }
+  if (product?.productTypes && product.productTypes.length > 0) {
+    availableTabs.push('types')
+  }
+  if (product?.portionTypes && product.portionTypes.length > 0) {
+    availableTabs.push('portions')
+  }
+  if (product?.toppingCategories && product.toppingCategories.length > 1) {
+    availableTabs.push('modifier-groups')
+  }
+  if (product?.toppingCategories && product.toppingCategories.length > 0) {
+    availableTabs.push('modifiers')
+  }
+
+  // Set initial tab when product changes
   useEffect(() => {
-    if (product) {
-      resetSelections()
-      const firstTab = getFirstTab()
-      setTab(firstTab)
+    if (product && availableTabs.length > 0) {
+      setCurrentTab(availableTabs[0])
+      // Set first category as active for modifiers
+      if (product.toppingCategories && product.toppingCategories.length > 0) {
+        setActiveCategory(product.toppingCategories[0])
+      }
     }
   }, [product?.id])
 
-  if (!product) {
+  const getNextTab = (fromTab: ModifierTab): ModifierTab | null => {
+    const tabOrder: ModifierTab[] = [
+      'sizes',
+      'types',
+      'portions',
+      'modifier-groups',
+      'modifiers',
+    ]
+    const currentIndex = tabOrder.indexOf(fromTab)
+    for (let i = currentIndex + 1; i < tabOrder.length; i++) {
+      if (availableTabs.includes(tabOrder[i])) {
+        return tabOrder[i]
+      }
+    }
+    return null
+  }
+
+  const advanceTab = (fromTab: ModifierTab) => {
+    const next = getNextTab(fromTab)
+    if (next) setCurrentTab(next)
+  }
+
+  if (!product || !item) {
     return (
-      <div className="flex h-full items-center justify-center text-base-content/50">
+      <div className="text-base-content/50 flex h-full items-center justify-center">
         No product selected
       </div>
     )
-  }
-
-  const handleReset = () => {
-    resetSelections()
-    const firstTab = getFirstTab()
-    setTab(firstTab)
   }
 
   return (
@@ -60,20 +101,39 @@ export function ModifierView({
       <ModifierHeader
         onConfirm={onConfirm}
         onCancel={onCancel}
-        onReset={handleReset}
         onDelete={onDelete}
       />
 
       {/* Tab bar */}
-      <ModifierTabs />
+      <ModifierTabs
+        availableTabs={availableTabs}
+        currentTab={currentTab}
+        onTabChange={setCurrentTab}
+      />
 
       {/* Tab content */}
       <div className="min-h-0 flex-1 overflow-auto">
-        {currentTab === 'sizes' && <SizeSelector />}
-        {currentTab === 'types' && <TypeSelector />}
-        {currentTab === 'portions' && <PortionSelector />}
-        {currentTab === 'modifier-groups' && <ModifierGroupSelector />}
-        {currentTab === 'modifiers' && <ToppingGrid />}
+        {currentTab === 'sizes' && (
+          <SizeSelector onAdvance={() => advanceTab('sizes')} />
+        )}
+        {currentTab === 'types' && (
+          <TypeSelector onAdvance={() => advanceTab('types')} />
+        )}
+        {currentTab === 'portions' && (
+          <PortionSelector onAdvance={() => advanceTab('portions')} />
+        )}
+        {currentTab === 'modifier-groups' && (
+          <ModifierGroupSelector
+            activeCategory={activeCategory}
+            onSelectCategory={(cat) => {
+              setActiveCategory(cat)
+              setCurrentTab('modifiers')
+            }}
+          />
+        )}
+        {currentTab === 'modifiers' && (
+          <ToppingGrid activeCategory={activeCategory} />
+        )}
       </div>
     </div>
   )

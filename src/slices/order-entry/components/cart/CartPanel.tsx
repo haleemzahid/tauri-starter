@@ -1,11 +1,6 @@
 // CartPanel - Resizable cart sidebar (composition of header, items, footer)
 
-import { useAtomValue } from 'jotai'
-import {
-  cartItemsAtom,
-  cartTotalsAtom,
-  useCartActions,
-} from '../../shared/store'
+import { useCart, useCartTotals, useCartActions } from '../../shared/machines'
 import { useResizablePanel } from '../../shared/hooks/useResizablePanel'
 import { CartHeader } from './CartHeader'
 import { CartItemList } from './CartItemList'
@@ -32,9 +27,9 @@ export function CartPanel({
   onCancel,
   onDiscount,
 }: CartPanelProps) {
-  const items = useAtomValue(cartItemsAtom)
-  const totals = useAtomValue(cartTotalsAtom)
-  const { removeItem, removeModifier } = useCartActions()
+  const items = useCart()
+  const totals = useCartTotals()
+  const { removeItem } = useCartActions()
 
   const { width, panelRef, startResize } = useResizablePanel({
     storageKey: 'cart-panel-width',
@@ -60,7 +55,6 @@ export function CartPanel({
         items={items}
         onDoubleClickItem={onDoubleClickItem}
         onRemoveItem={removeItem}
-        onRemoveModifier={removeModifier}
       />
 
       <CartFooter

@@ -10,7 +10,6 @@ interface CartItemRowProps {
   onSelect: (item: CartItem) => void
   onDoubleClick: (item: CartItem) => void
   onRemove: (itemId: string) => void
-  onRemoveModifier?: (itemId: string, modifierId: string) => void
 }
 
 // Style classes extracted for readability
@@ -26,11 +25,11 @@ export function CartItemRow({
   onSelect,
   onDoubleClick,
   onRemove,
-  onRemoveModifier,
 }: CartItemRowProps) {
   const hasModifiers =
     item.modifiers.length > 0 ||
     item.portions.some((p) => p.modifiers.length > 0)
+  const hasSpecialRequests = (item.specialRequests?.length ?? 0) > 0
   const lineTotal = calculateItemLinePrice(item)
 
   // Format discount percentage if applied
@@ -61,7 +60,9 @@ export function CartItemRow({
         <div className="flex-1">
           <span className="font-medium">
             {item.size && (
-              <span>{item.size.size?.name ?? item.size.size?.displayName} </span>
+              <span>
+                {item.size.size?.name ?? item.size.size?.displayName}{' '}
+              </span>
             )}
             {item.product.displayName ?? item.product.name}
             {discountSuffix}
@@ -95,50 +96,44 @@ export function CartItemRow({
           {item.modifiers.map((mod) => (
             <div key={mod.id} className="group flex items-center gap-1">
               <span className="flex-1">
-                {mod.affix && <span className="italic">{mod.affix.name} </span>}•{' '}
-                {mod.topping.displayName ?? mod.topping.name}
+                {mod.affix && <span className="italic">{mod.affix.name} </span>}
+                • {mod.topping.displayName ?? mod.topping.name}
                 {mod.quantity > 1 && ` x${mod.quantity}`}
                 {Number(mod.topping.price) > 0 &&
                   ` (+${formatCurrency(Number(mod.topping.price) * mod.quantity)})`}
               </span>
-              {onRemoveModifier && (
-                <button
-                  className="text-error "
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    onRemoveModifier(item.id, mod.id)
-                  }}
-                  aria-label="Remove modifier"
-                >
-                  <Trash2 className="h-3 w-3" />
-                </button>
-              )}
             </div>
           ))}
           {item.portions.map((portion) =>
             portion.modifiers.map((mod) => (
               <div key={mod.id} className="group flex items-center gap-1">
                 <span className="flex-1">
-                  {mod.affix && <span className="italic">{mod.affix.name} </span>}
+                  {mod.affix && (
+                    <span className="italic">{mod.affix.name} </span>
+                  )}
                   • {mod.topping.displayName ?? mod.topping.name} (
                   {portion.portionType.name})
                   {mod.quantity > 1 && ` x${mod.quantity}`}
                 </span>
-                {onRemoveModifier && (
-                  <button
-                    className="text-error opacity-0 transition-opacity group-hover:opacity-100"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      onRemoveModifier(item.id, mod.id)
-                    }}
-                    aria-label="Remove modifier"
-                  >
-                    <Trash2 className="h-3 w-3" />
-                  </button>
-                )}
               </div>
             ))
           )}
+        </div>
+      )}
+
+      {/* Special Requests */}
+      {hasSpecialRequests && (
+        <div className="text-base-content/60 mt-1 ml-10 text-sm">
+          {item.specialRequests.map((req) => (
+            <div key={req.id} className="flex items-center gap-2">
+              <span className="flex-1 italic">• {req.description}</span>
+              {req.price > 0 && (
+                <span className="text-base-content/80">
+                  {formatCurrency(req.price)}
+                </span>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

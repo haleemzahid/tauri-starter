@@ -1,43 +1,57 @@
 // PortionSelector - Grid of portion buttons (multi-select for half/half)
 
 import { cn } from '@/slices/shared/utils/cn'
-import { useSelectedProduct } from '../shared/store/ui-atoms'
 import {
-  useModifierSelections,
-  useTogglePortion,
-} from '../shared/store/modifier-atoms'
-import { useModifierNavigation } from './useModifierNavigation'
+  useEditingItem,
+  useEditingProduct,
+  useModifierActions,
+} from '../shared/machines'
 import type { PortionType } from '../shared/types'
 
-export function PortionSelector() {
-  const product = useSelectedProduct()
-  const { portionIds } = useModifierSelections()
-  const togglePortion = useTogglePortion()
-  const { advanceAfterPortion } = useModifierNavigation()
+interface PortionSelectorProps {
+  onAdvance: () => void
+}
+
+export function PortionSelector({ onAdvance }: PortionSelectorProps) {
+  const product = useEditingProduct()
+  const item = useEditingItem()
+  const { setPortions } = useModifierActions()
 
   const portions = product?.portionTypes ?? []
+  const selectedPortionIds = item?.portions.map((p) => p.portionType.id) ?? []
 
   if (portions.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-base-content/50">
+      <div className="text-base-content/50 flex h-full items-center justify-center">
         No portions available
       </div>
     )
   }
 
   const handleSelect = (portion: PortionType) => {
-    togglePortion(portion)
-    // Only auto-advance if this is the first portion selected
-    if (!portionIds.includes(portion.id)) {
-      advanceAfterPortion()
+    const isSelected = selectedPortionIds.includes(portion.id)
+    let newPortions: PortionType[]
+
+    if (isSelected) {
+      // Deselect
+      newPortions = (item?.portions ?? [])
+        .filter((p) => p.portionType.id !== portion.id)
+        .map((p) => p.portionType)
+    } else {
+      // Select - add to current portions
+      const currentPortions = (item?.portions ?? []).map((p) => p.portionType)
+      newPortions = [...currentPortions, portion]
+      onAdvance()
     }
+
+    setPortions(newPortions)
   }
 
   return (
     <div className="p-4">
       <div className="grid grid-cols-3 gap-3">
         {portions.map((portion) => {
-          const isSelected = portionIds.includes(portion.id)
+          const isSelected = selectedPortionIds.includes(portion.id)
 
           return (
             <button

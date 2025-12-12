@@ -2,47 +2,89 @@
 
 import { Check } from 'lucide-react'
 import { cn } from '@/slices/shared/utils/cn'
-import {
-  useActiveToppingCategory,
-  useModifierSelections,
-  useToggleModifier,
-} from '../shared/store/modifier-atoms'
+import { useEditingItem, useModifierActions } from '../shared/machines'
+import type {
+  ToppingCategory,
+  Topping,
+  CartItemModifier,
+} from '../shared/types'
 
-export function ToppingGrid() {
-  const activeCategory = useActiveToppingCategory()
-  const { modifiersByCategory } = useModifierSelections()
-  const toggleModifier = useToggleModifier()
+interface ToppingGridProps {
+  activeCategory: ToppingCategory | null
+}
+
+export function ToppingGrid({ activeCategory }: ToppingGridProps) {
+  const item = useEditingItem()
+  const { setModifiers } = useModifierActions()
 
   if (!activeCategory) {
     return (
-      <div className="flex h-full items-center justify-center text-base-content/50">
+      <div className="text-base-content/50 flex h-full items-center justify-center">
         Select a modifier group first
       </div>
     )
   }
 
   const toppings = activeCategory.toppings ?? []
+
+  // Get selected topping IDs from cart item
   const selectedIds =
-    modifiersByCategory.get(activeCategory.id)?.map((m) => m.toppingId) ?? []
+    item?.modifiers
+      .filter((m) => toppings.some((t) => t.id === m.topping.id))
+      .map((m) => m.topping.id) ?? []
 
   if (toppings.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-base-content/50">
+      <div className="text-base-content/50 flex h-full items-center justify-center">
         No modifiers in this group
       </div>
     )
+  }
+
+  const handleToggle = (topping: Topping) => {
+    if (!item) return
+
+    const isSelected = selectedIds.includes(topping.id)
+    let newModifiers: CartItemModifier[]
+
+    if (isSelected) {
+      // Deselect - remove this topping
+      newModifiers = item.modifiers.filter((m) => m.topping.id !== topping.id)
+    } else if (activeCategory.canAddMultiple) {
+      // Multi-select: add to existing
+      const newMod: CartItemModifier = {
+        id: crypto.randomUUID(),
+        topping,
+        quantity: 1,
+      }
+      newModifiers = [...item.modifiers, newMod]
+    } else {
+      // Single-select: remove other toppings from this category, add new one
+      const categoryToppingIds = new Set(toppings.map((t) => t.id))
+      const otherMods = item.modifiers.filter(
+        (m) => !categoryToppingIds.has(m.topping.id)
+      )
+      const newMod: CartItemModifier = {
+        id: crypto.randomUUID(),
+        topping,
+        quantity: 1,
+      }
+      newModifiers = [...otherMods, newMod]
+    }
+
+    setModifiers(newModifiers)
   }
 
   return (
     <div className="p-4">
       {/* Group name header */}
       <div className="mb-4">
-        <span className="rounded bg-base-200 px-3 py-1 text-sm font-medium">
+        <span className="bg-base-200 rounded px-3 py-1 text-sm font-medium">
           Selected Group:{' '}
           <span className="font-bold">{activeCategory.name}</span>
         </span>
         {!activeCategory.canAddMultiple && (
-          <span className="ml-2 text-xs text-base-content/50">
+          <span className="text-base-content/50 ml-2 text-xs">
             (Single select)
           </span>
         )}
@@ -56,9 +98,7 @@ export function ToppingGrid() {
           return (
             <button
               key={topping.id}
-              onClick={() =>
-                toggleModifier({ category: activeCategory, topping })
-              }
+              onClick={() => handleToggle(topping)}
               className={cn(
                 'btn relative h-16',
                 isSelected

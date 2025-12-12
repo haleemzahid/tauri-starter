@@ -1,25 +1,27 @@
-// TypeSelector - Grid of type buttons
+// TypeSelector - Grid of type buttons (reads from cart item, writes via machine)
 
 import { cn } from '@/slices/shared/utils/cn'
-import { useSelectedProduct } from '../shared/store/ui-atoms'
 import {
-  useModifierSelections,
-  useSetSelectedType,
-} from '../shared/store/modifier-atoms'
-import { useModifierNavigation } from './useModifierNavigation'
+  useEditingItem,
+  useEditingProduct,
+  useModifierActions,
+} from '../shared/machines'
 import type { ProductType } from '../shared/types'
 
-export function TypeSelector() {
-  const product = useSelectedProduct()
-  const { typeId } = useModifierSelections()
-  const setType = useSetSelectedType()
-  const { advanceAfterType } = useModifierNavigation()
+interface TypeSelectorProps {
+  onAdvance: () => void
+}
+
+export function TypeSelector({ onAdvance }: TypeSelectorProps) {
+  const product = useEditingProduct()
+  const item = useEditingItem()
+  const { setType } = useModifierActions()
 
   const types = product?.productTypes ?? []
 
   if (types.length === 0) {
     return (
-      <div className="flex h-full items-center justify-center text-base-content/50">
+      <div className="text-base-content/50 flex h-full items-center justify-center">
         No types available
       </div>
     )
@@ -27,14 +29,15 @@ export function TypeSelector() {
 
   const handleSelect = (type: ProductType) => {
     setType(type)
-    advanceAfterType()
+    onAdvance()
   }
 
   return (
     <div className="p-4">
       <div className="grid grid-cols-3 gap-3">
         {types.map((type) => {
-          const isSelected = typeId === type.id
+          // Read selected type from cart item
+          const isSelected = item?.type?.id === type.id
 
           return (
             <button

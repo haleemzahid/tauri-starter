@@ -16,6 +16,7 @@ interface MenuTopBarProps {
   onAllChecks?: () => void
   onSwitch?: () => void
   onExit?: () => void
+  onToggleLayout?: () => void
 }
 
 export function MenuTopBar({

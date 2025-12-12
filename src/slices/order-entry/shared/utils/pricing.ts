@@ -45,12 +45,16 @@ export function calculateModifiersTotal(item: CartItem): number {
 
 /**
  * Calculate item line price (before discounts and tax)
- * Formula: (BasePrice × Quantity) + ModifiersTotal
+ * Formula: (BasePrice × Quantity) + ModifiersTotal + SpecialRequestsTotal
  */
 export function calculateItemLinePrice(item: CartItem): number {
   const basePrice = calculateItemBasePrice(item)
   const modifiersTotal = calculateModifiersTotal(item)
-  return basePrice * item.quantity + modifiersTotal
+  const specialRequestsTotal = (item.specialRequests ?? []).reduce(
+    (sum, req) => sum + (req.price ?? 0),
+    0
+  )
+  return basePrice * item.quantity + modifiersTotal + specialRequestsTotal
 }
 
 /**

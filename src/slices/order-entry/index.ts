@@ -3,7 +3,26 @@
 // Types
 export * from './shared/types'
 
-// Hooks
+// Machine (XState)
+export { OrderMachineProvider } from './shared/machines'
+export {
+  useOrderView,
+  useCart,
+  useCartTotals,
+  useIsCartEmpty,
+  useCartActions,
+  useEditingItem,
+  useEditingProduct,
+  useServiceMethod,
+  useInvoiceDiscount,
+  useProductActions,
+  useModifierActions,
+  useNavigationActions,
+  useSessionActions,
+  useOrderActions,
+} from './shared/machines'
+
+// Hooks (data fetching)
 export { useMenus } from './browse-menu/useMenus'
 export { useCategories } from './browse-menu/useCategories'
 export {
@@ -11,18 +30,6 @@ export {
   useProductsByMenu,
   useDirectProducts,
 } from './browse-menu/useProducts'
-
-// Store
-export {
-  cartItemsAtom,
-  useCartItems,
-  useCartActions,
-  cartTotalsAtom,
-  useCartTotals,
-  serviceMethodAtom,
-  useServiceMethod,
-  isTaxExemptAtom,
-} from './shared/store'
 
 // Components
 export { OrderEntryPage } from './OrderEntryPage'

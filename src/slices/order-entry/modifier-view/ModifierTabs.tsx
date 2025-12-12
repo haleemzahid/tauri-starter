@@ -1,9 +1,7 @@
 // ModifierTabs - Tab bar for Size/Type/Portion/ModifierGroups/Modifiers
 
 import { cn } from '@/slices/shared/utils/cn'
-import { useModifierNavigation } from './useModifierNavigation'
-import { useModifierValidation } from './useModifierValidation'
-import type { ModifierTab } from '../shared/store/ui-atoms'
+import type { ModifierTab } from './ModifierView'
 
 const TAB_LABELS: Record<ModifierTab, string> = {
   sizes: 'Sizes',
@@ -13,40 +11,31 @@ const TAB_LABELS: Record<ModifierTab, string> = {
   modifiers: 'Modifiers',
 }
 
-export function ModifierTabs() {
-  const { currentTab, availableTabs, goToTab, canAccessModifiers } =
-    useModifierNavigation()
-  const { unsatisfiedGroupIds } = useModifierValidation()
+interface ModifierTabsProps {
+  availableTabs: ModifierTab[]
+  currentTab: ModifierTab
+  onTabChange: (tab: ModifierTab) => void
+}
 
+export function ModifierTabs({
+  availableTabs,
+  currentTab,
+  onTabChange,
+}: ModifierTabsProps) {
   if (availableTabs.length === 0) return null
 
   return (
-    <div className="flex gap-2 border-b border-base-300 bg-base-100 px-4 py-2">
+    <div className="border-base-300 bg-base-100 flex gap-2 border-b px-4 py-2">
       {availableTabs.map((tab) => {
         const isActive = tab === currentTab
-        const isModifierTab = tab === 'modifier-groups' || tab === 'modifiers'
-        const isDisabled = isModifierTab && !canAccessModifiers()
-
-        // Show warning on modifier-groups if any mandatory group unsatisfied
-        const hasWarning =
-          tab === 'modifier-groups' && unsatisfiedGroupIds.length > 0
 
         return (
           <button
             key={tab}
-            onClick={() => !isDisabled && goToTab(tab)}
-            disabled={isDisabled}
-            className={cn(
-              'btn btn-sm',
-              isActive ? 'btn-primary' : 'btn-ghost',
-              isDisabled && 'btn-disabled opacity-50',
-              hasWarning && !isActive && 'ring-2 ring-error'
-            )}
+            onClick={() => onTabChange(tab)}
+            className={cn('btn btn-sm', isActive ? 'btn-primary' : 'btn-ghost')}
           >
             {TAB_LABELS[tab]}
-            {hasWarning && !isActive && (
-              <span className="badge badge-error badge-xs ml-1">!</span>
-            )}
           </button>
         )
       })}

@@ -4,7 +4,7 @@ let db: Database | null = null
 
 // Path to existing PennPOS database
 const PENNPOS_DB_PATH =
-  'sqlite:C:\\Users\\Haleem Khan\\AppData\\Local\\Packages\\com.companynameV2.PennPOS.App_dp9yhbjdv06c8\\LocalState\\efcoredbv2.db3'
+  'sqlite:C:\\Users\\Haleem Khan\\AppData\\Local\\Packages\\com.companynameV2.PennPOS.App_dp9yhbjdv06c8\\LocalState\\efcoredbv3.db3'
 
 /**
  * Initialize the SQLite database

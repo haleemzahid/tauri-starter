@@ -2,7 +2,7 @@
 
 import { useOrderEntryActions } from '../../browse-menu/useOrderEntryActions'
 import { useActionHandlers } from '../../shared/hooks/useActionHandlers'
-import { useSelectedCartItem } from '../../shared/store'
+import { useSelectedCartItem } from '../../shared/machines'
 import { ActionButton } from './ActionButton'
 import { ConfirmDialog } from '../shared'
 
