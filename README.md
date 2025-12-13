@@ -77,6 +77,14 @@ pnpm tauri dev
 # Using bun
 bun tauri dev
 ```
+### 3. Start Development on android
+
+```bash
+# Using bun
+bun tauri android init
+bun tauri android dev
+
+```
 
 ## Manual Setup
 

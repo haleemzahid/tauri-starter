@@ -8,8 +8,7 @@ export {
 } from './orderMachine'
 export type { OrderContext, OrderEvent } from './orderMachine'
 
-export { OrderMachineProvider } from './OrderMachineProvider'
-export { useOrderMachineContext } from './orderMachineContext'
+export { OrderMachineProvider, useOrderActorRef, useOrderSelector } from './OrderMachineProvider'
 
 export {
   // View

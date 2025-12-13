@@ -1,6 +1,6 @@
 // ModifierView - Main container for product configuration (XState powered)
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useEditingItem, useEditingProduct } from '../shared/machines'
 import { ModifierHeader } from './ModifierHeader'
 import { ModifierTabs } from './ModifierTabs'
@@ -36,23 +36,16 @@ export function ModifierView({
     null
   )
 
-  // Determine available tabs based on product
-  const availableTabs: ModifierTab[] = []
-  if (product?.assignedSizes && product.assignedSizes.length > 0) {
-    availableTabs.push('sizes')
-  }
-  if (product?.productTypes && product.productTypes.length > 0) {
-    availableTabs.push('types')
-  }
-  if (product?.portionTypes && product.portionTypes.length > 0) {
-    availableTabs.push('portions')
-  }
-  if (product?.toppingCategories && product.toppingCategories.length > 1) {
-    availableTabs.push('modifier-groups')
-  }
-  if (product?.toppingCategories && product.toppingCategories.length > 0) {
-    availableTabs.push('modifiers')
-  }
+  // Determine available tabs based on product (memoized)
+  const availableTabs = useMemo(() => {
+    const tabs: ModifierTab[] = []
+    if (product?.assignedSizes?.length) tabs.push('sizes')
+    if (product?.productTypes?.length) tabs.push('types')
+    if (product?.portionTypes?.length) tabs.push('portions')
+    if ((product?.toppingCategories?.length ?? 0) > 1) tabs.push('modifier-groups')
+    if (product?.toppingCategories?.length) tabs.push('modifiers')
+    return tabs
+  }, [product])
 
   // Set initial tab when product changes
   useEffect(() => {

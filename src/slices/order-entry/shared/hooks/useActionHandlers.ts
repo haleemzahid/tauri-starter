@@ -1,7 +1,10 @@
 // Action Handlers - Centralized logic for order entry action buttons
 
 import { useCallback, useState } from 'react'
-import { useOrderMachineContext } from '../machines/orderMachineContext'
+import {
+  useOrderActorRef,
+  useOrderSelector,
+} from '../machines/OrderMachineProvider'
 import {
   useSelectedCartItem,
   useCartActions,
@@ -11,13 +14,13 @@ import type { ActionType } from '../types/order-entry-action'
 import type { CartItem } from '../types'
 
 export function useActionHandlers() {
-  const { context } = useOrderMachineContext()
-  const isTaxExempt = context.isTaxExempt
+  const actorRef = useOrderActorRef()
+  const send = actorRef.send
+  const isTaxExempt = useOrderSelector((s) => s.context.isTaxExempt)
+
   const selectedItem = useSelectedCartItem()
   const { removeItem, setItemDiscount } = useCartActions()
   const { setInvoiceDiscount, setTaxExempt } = useSessionActions()
-
-  const { send } = useOrderMachineContext()
 
   // Confirmation dialog state for CancelOrder
   const [showCancelConfirm, setShowCancelConfirm] = useState(false)

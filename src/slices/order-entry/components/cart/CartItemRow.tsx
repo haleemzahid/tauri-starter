@@ -1,5 +1,6 @@
 // CartItemRow - Single cart item display with modifiers
 
+import { memo } from 'react'
 import { Trash2 } from 'lucide-react'
 import { formatCurrency, calculateItemLinePrice } from '../../shared/utils'
 import type { CartItem } from '../../shared/types'
@@ -19,7 +20,7 @@ const hoverStyles = 'hover:bg-base-200'
 const selectedStyles = 'bg-base-200'
 const unselectedStyles = ''
 
-export function CartItemRow({
+export const CartItemRow = memo(function CartItemRow({
   item,
   isSelected = false,
   onSelect,
@@ -138,4 +139,4 @@ export function CartItemRow({
       )}
     </div>
   )
-}
+})

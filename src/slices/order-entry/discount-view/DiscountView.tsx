@@ -1,5 +1,6 @@
 // DiscountView - Discount selection grid
 
+import { memo } from 'react'
 import { useDiscounts } from './useDiscounts'
 import type { Discount } from '../shared/types'
 
@@ -71,7 +72,7 @@ interface DiscountTileProps {
   onClick: () => void
 }
 
-function DiscountTile({ discount, onClick }: DiscountTileProps) {
+const DiscountTile = memo(function DiscountTile({ discount, onClick }: DiscountTileProps) {
   // discountPercentage comes from SQLite as string, parse to number
   const value = parseFloat(String(discount.discountPercentage)) || 0
   const displayValue = value.toFixed(1)
@@ -90,4 +91,4 @@ function DiscountTile({ discount, onClick }: DiscountTileProps) {
       <span className="text-sm">{displayValue}</span>
     </button>
   )
-}
+})

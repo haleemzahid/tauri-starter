@@ -1,14 +1,25 @@
 // Menu Browse View - Horizontal columns for menu navigation
+// Optimized with virtualization and prefetching for fast rendering
 
-import { MenuColumn, Tile, MenuTopBar, MenuBottomBar } from '../components/menu'
+import {
+  MenuColumn,
+  MenuTopBar,
+  MenuBottomBar,
+  VirtualizedTileGrid,
+} from '../components/menu'
 import { useMenuBrowse } from './useMenuBrowse'
-import type { Product } from '../shared/types'
+import { usePrefetch } from './usePrefetch'
+import type { Product, Menu, MenuCategory } from '../shared/types'
 
 interface MenuBrowseViewProps {
   onProductSelect: (product: Product) => void | Promise<void>
 }
 
 export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
+  const handleProduct = (product: Product) => {
+    void onProductSelect(product)
+  }
+
   const {
     selectedMenuId,
     selectedCategoryId,
@@ -23,7 +34,20 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
     handleMenuSelect,
     handleCategorySelect,
     handleProductSelect,
-  } = useMenuBrowse(onProductSelect)
+  } = useMenuBrowse(handleProduct)
+
+  const { prefetchCategories, prefetchMenuProducts, prefetchCategoryProducts } =
+    usePrefetch()
+
+  // Prefetch on hover handlers
+  const handleMenuHover = (menu: Menu) => {
+    prefetchCategories(menu.id)
+    prefetchMenuProducts(menu.id)
+  }
+
+  const handleCategoryHover = (category: MenuCategory) => {
+    prefetchCategoryProducts(category.id)
+  }
 
   return (
     <div className="relative flex h-full w-full flex-col overflow-hidden">
@@ -34,30 +58,25 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
       <div className="min-h-0 min-w-0 flex-1 overflow-x-auto p-4 pb-16">
         <div className="flex h-full min-w-full gap-2">
           <MenuColumn title="Menus" configName="Menus" isLoading={menusLoading}>
-            {visibleMenus.map((menu) => (
-              <Tile
-                key={menu.id}
-                item={menu}
-                isSelected={menu.id === selectedMenuId}
-                onClick={() => handleMenuSelect(menu)}
-              />
-            ))}
+            <VirtualizedTileGrid
+              items={visibleMenus}
+              selectedId={selectedMenuId}
+              onItemClick={(item) => handleMenuSelect(item as Menu)}
+              onItemHover={(item) => handleMenuHover(item as Menu)}
+            />
           </MenuColumn>
 
-          {/* Column 2: Menu Products (products directly on menu) */}
+          {/* Column 2: Menu Products - Virtualized for performance */}
           <MenuColumn
             title="Menu Items"
             configName="Menu Products"
             isLoading={menuProductsLoading}
           >
-            {menuProducts.map((product) => (
-              <Tile
-                key={product.id}
-                item={product}
-                showPrice
-                onClick={() => handleProductSelect(product)}
-              />
-            ))}
+            <VirtualizedTileGrid
+              items={menuProducts}
+              showPrice
+              onItemClick={(item) => handleProductSelect(item as Product)}
+            />
           </MenuColumn>
 
           {/* Column 3: Categories (Menu Groups) */}
@@ -67,14 +86,16 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
             isLoading={categoriesLoading}
           >
             {categories.length > 0 ? (
-              categories.map((category) => (
-                <Tile
-                  key={category.id}
-                  item={category}
-                  isSelected={category.id === selectedCategoryId}
-                  onClick={() => handleCategorySelect(category)}
-                />
-              ))
+              <VirtualizedTileGrid
+                items={categories}
+                selectedId={selectedCategoryId}
+                onItemClick={(item) =>
+                  handleCategorySelect(item as MenuCategory)
+                }
+                onItemHover={(item) =>
+                  handleCategoryHover(item as MenuCategory)
+                }
+              />
             ) : (
               <div className="text-base-content/50 py-4 text-center text-sm">
                 No menu groups
@@ -82,7 +103,7 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
             )}
           </MenuColumn>
 
-          {/* Column 4: Category Products */}
+          {/* Column 4: Category Products - Virtualized for performance */}
           <MenuColumn
             title="Products"
             configName="Products"
@@ -92,14 +113,11 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
             }
           >
             {categoryProducts.length > 0 ? (
-              categoryProducts.map((product) => (
-                <Tile
-                  key={product.id}
-                  item={product}
-                  showPrice
-                  onClick={() => handleProductSelect(product)}
-                />
-              ))
+              <VirtualizedTileGrid
+                items={categoryProducts}
+                showPrice
+                onItemClick={(item) => handleProductSelect(item as Product)}
+              />
             ) : (
               <div className="text-base-content/50 py-4 text-center text-sm">
                 No products

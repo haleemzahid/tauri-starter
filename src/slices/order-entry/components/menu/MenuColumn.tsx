@@ -1,6 +1,6 @@
 // Menu Column - Single column in the horizontal menu layout
 
-import type { ReactNode } from 'react'
+import { memo, type ReactNode } from 'react'
 import { useUIControl } from '../../shared/hooks/useUIControl'
 
 interface MenuColumnProps {
@@ -10,7 +10,7 @@ interface MenuColumnProps {
   isLoading?: boolean
 }
 
-export function MenuColumn({
+export const MenuColumn = memo(function MenuColumn({
   title,
   configName,
   children,
@@ -48,4 +48,4 @@ export function MenuColumn({
       </div>
     </div>
   )
-}
+})

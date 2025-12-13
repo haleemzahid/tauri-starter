@@ -6,7 +6,9 @@ import { useCategories } from './useCategories'
 import { useProductsByCategory, useProductsByMenu } from './useProducts'
 import type { Menu, MenuCategory, Product } from '../shared/types'
 
-export function useMenuBrowse(onProductSelect: (product: Product) => void) {
+export function useMenuBrowse(
+  onProductSelect: (product: Product) => void | Promise<void>
+) {
   const [selectedMenuId, setSelectedMenuId] = useState<string | null>(null)
   const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(
     null
@@ -48,7 +50,9 @@ export function useMenuBrowse(onProductSelect: (product: Product) => void) {
   }, [])
 
   const handleProductSelect = useCallback(
-    (product: Product) => onProductSelect(product),
+    (product: Product) => {
+      void onProductSelect(product)
+    },
     [onProductSelect]
   )
 

@@ -1,5 +1,6 @@
 // ToppingGrid - Grid of individual topping buttons
 
+import { useMemo, useCallback } from 'react'
 import { Check } from 'lucide-react'
 import { cn } from '@/slices/shared/utils/cn'
 import { useEditingItem, useModifierActions } from '../shared/machines'
@@ -27,11 +28,16 @@ export function ToppingGrid({ activeCategory }: ToppingGridProps) {
 
   const toppings = activeCategory.toppings ?? []
 
-  // Get selected topping IDs from cart item
-  const selectedIds =
-    item?.modifiers
-      .filter((m) => toppings.some((t) => t.id === m.topping.id))
-      .map((m) => m.topping.id) ?? []
+  // Get selected topping IDs from cart item (memoized with Set for O(1) lookup)
+  const selectedIds = useMemo(() => {
+    if (!item) return new Set<string>()
+    const toppingIds = new Set(toppings.map((t) => t.id))
+    return new Set(
+      item.modifiers
+        .filter((m) => toppingIds.has(m.topping.id))
+        .map((m) => m.topping.id)
+    )
+  }, [item?.modifiers, toppings])
 
   if (toppings.length === 0) {
     return (
@@ -41,39 +47,42 @@ export function ToppingGrid({ activeCategory }: ToppingGridProps) {
     )
   }
 
-  const handleToggle = (topping: Topping) => {
-    if (!item) return
+  const handleToggle = useCallback(
+    (topping: Topping) => {
+      if (!item) return
 
-    const isSelected = selectedIds.includes(topping.id)
-    let newModifiers: CartItemModifier[]
+      const isSelected = selectedIds.has(topping.id)
+      let newModifiers: CartItemModifier[]
 
-    if (isSelected) {
-      // Deselect - remove this topping
-      newModifiers = item.modifiers.filter((m) => m.topping.id !== topping.id)
-    } else if (activeCategory.canAddMultiple) {
-      // Multi-select: add to existing
-      const newMod: CartItemModifier = {
-        id: crypto.randomUUID(),
-        topping,
-        quantity: 1,
+      if (isSelected) {
+        // Deselect - remove this topping
+        newModifiers = item.modifiers.filter((m) => m.topping.id !== topping.id)
+      } else if (activeCategory.canAddMultiple) {
+        // Multi-select: add to existing
+        const newMod: CartItemModifier = {
+          id: crypto.randomUUID(),
+          topping,
+          quantity: 1,
+        }
+        newModifiers = [...item.modifiers, newMod]
+      } else {
+        // Single-select: remove other toppings from this category, add new one
+        const categoryToppingIds = new Set(toppings.map((t) => t.id))
+        const otherMods = item.modifiers.filter(
+          (m) => !categoryToppingIds.has(m.topping.id)
+        )
+        const newMod: CartItemModifier = {
+          id: crypto.randomUUID(),
+          topping,
+          quantity: 1,
+        }
+        newModifiers = [...otherMods, newMod]
       }
-      newModifiers = [...item.modifiers, newMod]
-    } else {
-      // Single-select: remove other toppings from this category, add new one
-      const categoryToppingIds = new Set(toppings.map((t) => t.id))
-      const otherMods = item.modifiers.filter(
-        (m) => !categoryToppingIds.has(m.topping.id)
-      )
-      const newMod: CartItemModifier = {
-        id: crypto.randomUUID(),
-        topping,
-        quantity: 1,
-      }
-      newModifiers = [...otherMods, newMod]
-    }
 
-    setModifiers(newModifiers)
-  }
+      setModifiers(newModifiers)
+    },
+    [item, selectedIds, activeCategory, toppings, setModifiers]
+  )
 
   return (
     <div className="p-4">
@@ -93,7 +102,7 @@ export function ToppingGrid({ activeCategory }: ToppingGridProps) {
       {/* Toppings grid */}
       <div className="grid grid-cols-4 gap-3">
         {toppings.map((topping) => {
-          const isSelected = selectedIds.includes(topping.id)
+          const isSelected = selectedIds.has(topping.id)
 
           return (
             <button

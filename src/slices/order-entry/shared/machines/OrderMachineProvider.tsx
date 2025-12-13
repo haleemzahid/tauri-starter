@@ -1,9 +1,34 @@
 // Order Machine Provider - React context for XState machine
 
-import type { ReactNode } from 'react'
-import { useMachine } from '@xstate/react'
-import { orderMachine } from './orderMachine'
-import { OrderMachineContext } from './orderMachineContext'
+import { createContext, useContext, type ReactNode } from 'react'
+import { useMachine, useSelector } from '@xstate/react'
+import { orderMachine, type OrderContext } from './orderMachine'
+import type { ActorRefFrom } from 'xstate'
+
+// === Types ===
+
+type OrderActorRef = ActorRefFrom<typeof orderMachine>
+
+// === Actor Context (for useSelector) ===
+
+const OrderActorContext = createContext<OrderActorRef | null>(null)
+
+export function useOrderActorRef(): OrderActorRef {
+  const actorRef = useContext(OrderActorContext)
+  if (!actorRef) {
+    throw new Error('useOrderActorRef must be used within OrderMachineProvider')
+  }
+  return actorRef
+}
+
+// Generic selector hook for optimized subscriptions
+export function useOrderSelector<T>(
+  selector: (state: { context: OrderContext; value: unknown }) => T,
+  compare?: (a: T, b: T) => boolean
+): T {
+  const actorRef = useOrderActorRef()
+  return useSelector(actorRef, selector, compare)
+}
 
 // === Provider ===
 
@@ -12,13 +37,11 @@ interface OrderMachineProviderProps {
 }
 
 export function OrderMachineProvider({ children }: OrderMachineProviderProps) {
-  const [state, send] = useMachine(orderMachine)
+  const [_state, _send, actorRef] = useMachine(orderMachine)
 
   return (
-    <OrderMachineContext.Provider
-      value={{ state, send, context: state.context }}
-    >
+    <OrderActorContext.Provider value={actorRef}>
       {children}
-    </OrderMachineContext.Provider>
+    </OrderActorContext.Provider>
   )
 }

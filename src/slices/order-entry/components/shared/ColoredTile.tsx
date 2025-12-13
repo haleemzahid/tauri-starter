@@ -1,7 +1,7 @@
 // Colored Tile - Base component for menu items, products, toppings
 // Uses dynamic colors from database
 
-import { type ReactNode } from 'react'
+import { type ReactNode, memo } from 'react'
 
 interface ColoredTileProps {
   backColor?: string | null
@@ -13,7 +13,7 @@ interface ColoredTileProps {
   disabled?: boolean
 }
 
-export function ColoredTile({
+export const ColoredTile = memo(function ColoredTile({
   backColor,
   foreColor,
   children,
@@ -46,7 +46,7 @@ export function ColoredTile({
           min-h-12 px-3 py-2
           rounded-md font-medium text-sm
           border border-base-300
-          transition-all duration-150
+          transition-transform
           touch-manipulation select-none
           ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:brightness-110 active:scale-95'}
           ${className}
@@ -56,4 +56,4 @@ export function ColoredTile({
       </button>
     </div>
   )
-}
+})

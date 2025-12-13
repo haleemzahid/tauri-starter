@@ -1,7 +1,7 @@
-// Order Machine Hooks - Convenience hooks for common operations
+// Order Machine Hooks - Optimized with useSelector for minimal re-renders
 
 import { useCallback, useMemo } from 'react'
-import { useOrderMachineContext } from './orderMachineContext'
+import { useOrderActorRef, useOrderSelector } from './OrderMachineProvider'
 import {
   selectEditingItem,
   selectEditingProduct,
@@ -22,82 +22,85 @@ import type {
   SpecialRequest,
 } from '../types'
 
+// === Utility: Get send function from actor ===
+
+function useOrderSend() {
+  const actorRef = useOrderActorRef()
+  return actorRef.send
+}
+
 // === View State ===
 
 export type OrderView = 'menu' | 'modifiers' | 'discount' | 'payment'
 
 export function useOrderView(): OrderView {
-  const { state } = useOrderMachineContext()
-
-  if (state.matches('configuring')) return 'modifiers'
-  if (state.matches('discount')) return 'discount'
-  if (state.matches('payment')) return 'payment'
-  return 'menu'
+  return useOrderSelector((state) => {
+    const value = state.value as string
+    if (value === 'configuring') return 'modifiers'
+    if (value === 'discount') return 'discount'
+    if (value === 'payment') return 'payment'
+    return 'menu'
+  })
 }
 
-// === Cart State ===
+// === Cart State (optimized selectors) ===
 
 export function useCart(): CartItem[] {
-  const { context } = useOrderMachineContext()
-  return context.cart
+  return useOrderSelector((state) => state.context.cart)
 }
 
 export function useCartTotals(): CartTotals {
-  const { context } = useOrderMachineContext()
-  return useMemo(
-    () =>
+  return useOrderSelector(
+    (state) =>
       calculateCartTotals(
-        context.cart,
-        context.isTaxExempt,
-        context.invoiceDiscount,
-        context.tenderAmount
+        state.context.cart,
+        state.context.isTaxExempt,
+        state.context.invoiceDiscount,
+        state.context.tenderAmount
       ),
-    [
-      context.cart,
-      context.isTaxExempt,
-      context.invoiceDiscount,
-      context.tenderAmount,
-    ]
+    // Custom equality - only re-render if totals change
+    (a, b) =>
+      a.subTotal === b.subTotal &&
+      a.totalTax === b.totalTax &&
+      a.grandTotal === b.grandTotal &&
+      a.totalDue === b.totalDue
   )
 }
 
 export function useIsCartEmpty(): boolean {
-  const { context } = useOrderMachineContext()
-  return context.cart.length === 0
+  return useOrderSelector((state) => state.context.cart.length === 0)
 }
 
 // === Editing State ===
 
 export function useEditingItem(): CartItem | null {
-  const { context } = useOrderMachineContext()
-  return selectEditingItem(context)
+  return useOrderSelector((state) => selectEditingItem(state.context))
 }
 
 export function useEditingProduct(): Product | null {
-  const { context } = useOrderMachineContext()
-  return selectEditingProduct(context)
+  return useOrderSelector((state) => selectEditingProduct(state.context))
 }
 
 export function useIsNewItem(): boolean {
-  const { context } = useOrderMachineContext()
-  return context.isNewItem
+  return useOrderSelector((state) => state.context.isNewItem)
 }
 
 // === Selected Cart Item (for discounts) ===
 
 export function useSelectedCartItemId(): string | null {
-  const { context } = useOrderMachineContext()
-  return context.selectedCartItemId
+  return useOrderSelector((state) => state.context.selectedCartItemId)
 }
 
 export function useSelectedCartItem(): CartItem | null {
-  const { context } = useOrderMachineContext()
-  if (!context.selectedCartItemId) return null
-  return context.cart.find((i) => i.id === context.selectedCartItemId) ?? null
+  return useOrderSelector((state) => {
+    const { selectedCartItemId, cart } = state.context
+    if (!selectedCartItemId) return null
+    return cart.find((i) => i.id === selectedCartItemId) ?? null
+  })
 }
 
 export function useSelectCartItem() {
-  const { send } = useOrderMachineContext()
+  const send = useOrderSend()
   return useCallback(
     (itemId: string | null) => send({ type: 'SELECT_CART_ITEM', itemId }),
     [send]
@@ -107,19 +110,17 @@ export function useSelectCartItem() {
 // === Session State ===
 
 export function useServiceMethod(): ServiceMethod | null {
-  const { context } = useOrderMachineContext()
-  return context.serviceMethod
+  return useOrderSelector((state) => state.context.serviceMethod)
 }
 
 export function useInvoiceDiscount(): Discount | null {
-  const { context } = useOrderMachineContext()
-  return context.invoiceDiscount
+  return useOrderSelector((state) => state.context.invoiceDiscount)
 }
 
 // === Cart Actions ===
 
 export function useCartActions() {
-  const { send } = useOrderMachineContext()
+  const send = useOrderSend()
 
   return useMemo(
     () => ({
@@ -134,7 +135,7 @@ export function useCartActions() {
 // === Product Actions ===
 
 export function useProductActions() {
-  const { send } = useOrderMachineContext()
+  const send = useOrderSend()
 
   const addProduct = useCallback(
     async (product: Product) => {
@@ -170,7 +171,7 @@ export function useProductActions() {
 // === Modifier Actions (live updates) ===
 
 export function useModifierActions() {
-  const { send } = useOrderMachineContext()
+  const send = useOrderSend()
 
   return useMemo(
     () => ({
@@ -198,8 +199,11 @@ export function useModifierActions() {
 // === Navigation Actions ===
 
 export function useNavigationActions() {
-  const { send, state } = useOrderMachineContext()
+  const send = useOrderSend()
   const isCartEmpty = useIsCartEmpty()
+  const isConfiguring = useOrderSelector(
+    (state) => state.value === 'configuring'
+  )
 
   return useMemo(
     () => ({
@@ -208,16 +212,16 @@ export function useNavigationActions() {
       goToPayment: () => {
         if (!isCartEmpty) send({ type: 'GO_TO_PAYMENT' })
       },
-      canGoToPayment: !isCartEmpty && !state.matches('configuring'),
+      canGoToPayment: !isCartEmpty && !isConfiguring,
     }),
-    [send, isCartEmpty, state]
+    [send, isCartEmpty, isConfiguring]
   )
 }
 
 // === Session Actions ===
 
 export function useSessionActions() {
-  const { send } = useOrderMachineContext()
+  const send = useOrderSend()
 
   return useMemo(
     () => ({
@@ -235,7 +239,7 @@ export function useSessionActions() {
 // === Order Actions ===
 
 export function useOrderActions() {
-  const { send } = useOrderMachineContext()
+  const send = useOrderSend()
 
   return useMemo(
     () => ({
