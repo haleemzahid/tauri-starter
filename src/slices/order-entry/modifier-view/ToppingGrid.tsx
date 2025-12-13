@@ -1,7 +1,7 @@
 // ToppingGrid - Grid of individual topping buttons
 
 import { useMemo, useCallback } from 'react'
-import { Check } from 'lucide-react'
+import { Check, Lock } from 'lucide-react'
 import { cn } from '@/slices/shared/utils/cn'
 import { useEditingItem, useModifierActions } from '../shared/machines'
 import type {
@@ -12,9 +12,17 @@ import type {
 
 interface ToppingGridProps {
   activeCategory: ToppingCategory | null
+  isLocked?: boolean
+  lockReason?: string
+  onGoToRequired?: () => void
 }
 
-export function ToppingGrid({ activeCategory }: ToppingGridProps) {
+export function ToppingGrid({
+  activeCategory,
+  isLocked = false,
+  lockReason,
+  onGoToRequired,
+}: ToppingGridProps) {
   const item = useEditingItem()
   const { setModifiers } = useModifierActions()
 
@@ -22,6 +30,28 @@ export function ToppingGrid({ activeCategory }: ToppingGridProps) {
     return (
       <div className="text-base-content/50 flex h-full items-center justify-center">
         Select a modifier group first
+      </div>
+    )
+  }
+
+  // Show locked overlay when mandatory modifiers not satisfied
+  if (isLocked) {
+    return (
+      <div className="flex h-full flex-col items-center justify-center gap-4 p-8">
+        <Lock className="h-12 w-12 text-warning" />
+        <div className="text-center">
+          <p className="text-lg font-semibold">Optional Modifiers Locked</p>
+          <p className="text-base-content/70 mt-2">
+            Please select a required modifier from{' '}
+            <span className="font-bold text-warning">{lockReason}</span> first.
+          </p>
+        </div>
+        <button
+          className="btn btn-warning btn-outline mt-4"
+          onClick={onGoToRequired}
+        >
+          Go to Required Modifiers
+        </button>
       </div>
     )
   }

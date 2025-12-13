@@ -1,6 +1,6 @@
 // ModifierView - Main container for product configuration (XState powered)
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useEditingItem, useEditingProduct } from '../shared/machines'
 import { ModifierHeader } from './ModifierHeader'
 import { ModifierTabs } from './ModifierTabs'
@@ -9,7 +9,8 @@ import { TypeSelector } from './TypeSelector'
 import { PortionSelector } from './PortionSelector'
 import { ModifierGroupSelector } from './ModifierGroupSelector'
 import { ToppingGrid } from './ToppingGrid'
-import type { ToppingCategory } from '../shared/types'
+import type { ToppingCategory
+} from '../shared/types'
 
 export type ModifierTab =
   | 'sizes'
@@ -46,6 +47,36 @@ export function ModifierView({
     if (product?.toppingCategories?.length) tabs.push('modifiers')
     return tabs
   }, [product])
+
+  // Get mandatory categories and check satisfaction status
+  const mandatoryCategories = useMemo(() => {
+    return product?.toppingCategories?.filter((c) => c.isMandatory) ?? []
+  }, [product?.toppingCategories])
+
+  // Check which mandatory categories are unsatisfied
+  const unsatisfiedMandatory = useMemo(() => {
+    if (!item) return mandatoryCategories
+    return mandatoryCategories.filter((category) => {
+      const toppingIds = new Set(category.toppings?.map((t) => t.id) ?? [])
+      const hasSelection = item.modifiers.some((m) => toppingIds.has(m.topping.id))
+      return !hasSelection
+    })
+  }, [item?.modifiers, mandatoryCategories])
+
+  // First unsatisfied mandatory category (for auto-navigation)
+  const firstUnsatisfied = unsatisfiedMandatory[0] ?? null
+
+  // Check if a category is optional (for disabling)
+  const isCategoryLocked = useCallback(
+    (category: ToppingCategory): boolean => {
+      if (unsatisfiedMandatory.length === 0) return false
+      return !category.isMandatory
+    },
+    [unsatisfiedMandatory]
+  )
+
+  // Check if modifiers tab should be locked
+  const isModifiersTabLocked = unsatisfiedMandatory.length > 0 && activeCategory && !activeCategory.isMandatory
 
   // Set initial tab when product changes
   useEffect(() => {
@@ -102,6 +133,7 @@ export function ModifierView({
         availableTabs={availableTabs}
         currentTab={currentTab}
         onTabChange={setCurrentTab}
+        unsatisfiedCount={unsatisfiedMandatory.length}
       />
 
       {/* Tab content */}
@@ -122,10 +154,22 @@ export function ModifierView({
               setActiveCategory(cat)
               setCurrentTab('modifiers')
             }}
+            isCategoryLocked={isCategoryLocked}
+            firstUnsatisfied={firstUnsatisfied}
           />
         )}
         {currentTab === 'modifiers' && (
-          <ToppingGrid activeCategory={activeCategory} />
+          <ToppingGrid
+            activeCategory={activeCategory}
+            isLocked={isModifiersTabLocked}
+            lockReason={firstUnsatisfied?.name}
+            onGoToRequired={() => {
+              if (firstUnsatisfied) {
+                setActiveCategory(firstUnsatisfied)
+                // Stay on modifiers tab but switch to required category
+              }
+            }}
+          />
         )}
       </div>
     </div>
