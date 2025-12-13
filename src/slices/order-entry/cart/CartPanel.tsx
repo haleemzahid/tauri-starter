@@ -1,12 +1,12 @@
 // CartPanel - Resizable cart sidebar (composition of header, items, footer)
 
-import { useCart, useCartTotals, useCartActions } from '../../shared/machines'
-import { useResizablePanel } from '../../shared/hooks/useResizablePanel'
+import { useCart, useCartTotals, useCartActions } from '../shared/machines'
+import { useResizablePanel } from '../shared/hooks/useResizablePanel'
 import { CartHeader } from './CartHeader'
 import { CartItemList } from './CartItemList'
 import { CartFooter } from './CartFooter'
-import { ResizeHandle } from '../shared/ResizeHandle'
-import type { CartItem, ServiceMethod } from '../../shared/types'
+import { ResizeHandle } from '../shared/components'
+import type { CartItem, ServiceMethod } from '../shared/types'
 
 interface CartPanelProps {
   serviceMethod: ServiceMethod | null

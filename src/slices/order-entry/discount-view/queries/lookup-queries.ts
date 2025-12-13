@@ -7,7 +7,7 @@ import type {
   Discount,
   TaxRate,
   Customer,
-} from '../types'
+} from '../../shared/types'
 
 /**
  * Get all service methods

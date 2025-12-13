@@ -1,8 +1,8 @@
 // useModifierFlow - All modifier tab state & logic extracted from ModifierView
 
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useEditingItem, useEditingProduct } from '../shared/machines'
-import type { ToppingCategory } from '../shared/types'
+import { useEditingItem, useEditingProduct } from '../../shared/machines'
+import type { ToppingCategory } from '../../shared/types'
 
 export type ModifierTab =
   | 'sizes'

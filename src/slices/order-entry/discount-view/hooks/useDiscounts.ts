@@ -1,7 +1,7 @@
 // useDiscounts - Fetch discounts from database
 
 import { useQuery } from '@tanstack/react-query'
-import { getDiscounts } from '../shared/database'
+import { getDiscounts } from '../../shared/database'
 
 export function useDiscounts() {
   return useQuery({

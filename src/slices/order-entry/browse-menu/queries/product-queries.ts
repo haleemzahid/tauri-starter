@@ -8,7 +8,7 @@ import type {
   ToppingCategory,
   Topping,
   Affix,
-} from '../types'
+} from '../../shared/types'
 
 /**
  * Get assigned sizes for a product

@@ -1,7 +1,7 @@
 // ServiceMethodSelect - Dropdown to select service method
 
-import { useServiceMethods } from '../../browse-menu/useServiceMethods'
-import type { ServiceMethod } from '../../shared/types'
+import { useServiceMethods } from '../browse-menu/hooks/useServiceMethods'
+import type { ServiceMethod } from '../shared/types'
 
 interface ServiceMethodSelectProps {
   value: ServiceMethod | null

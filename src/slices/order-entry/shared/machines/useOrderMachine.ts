@@ -7,7 +7,7 @@ import {
   selectEditingProduct,
   productNeedsModifiers,
 } from './orderMachine'
-import { getProductWithDetails } from '../database/product-queries'
+import { getProductWithDetails } from '../database'
 import { calculateCartTotals } from '../utils/pricing'
 import type {
   Product,

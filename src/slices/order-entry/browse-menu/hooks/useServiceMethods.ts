@@ -1,7 +1,7 @@
 // useServiceMethods - Hook to fetch service methods from database
 
 import { useQuery } from '@tanstack/react-query'
-import { getServiceMethods } from '../shared/database'
+import { getServiceMethods } from '../../shared/database'
 
 export function useServiceMethods() {
   return useQuery({

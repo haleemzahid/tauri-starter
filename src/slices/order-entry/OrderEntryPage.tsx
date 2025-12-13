@@ -3,7 +3,7 @@
 
 import { memo, useCallback } from 'react'
 import { MenuBrowseView } from './browse-menu'
-import { CartPanel } from './components/cart'
+import { CartPanel } from './cart'
 import { DiscountView } from './discount-view'
 import { ModifierView } from './modifier-view'
 import {

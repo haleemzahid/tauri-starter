@@ -23,17 +23,17 @@ export {
 } from './shared/machines'
 
 // Hooks (data fetching)
-export { useMenus } from './browse-menu/useMenus'
-export { useCategories } from './browse-menu/useCategories'
+export { useMenus } from './browse-menu/hooks/useMenus'
+export { useCategories } from './browse-menu/hooks/useCategories'
 export {
   useProductsByCategory,
   useProductsByMenu,
   useDirectProducts,
-} from './browse-menu/useProducts'
+} from './browse-menu/hooks/useProducts'
 
 // Components
 export { OrderEntryPage } from './OrderEntryPage'
-export * from './components/shared'
-export * from './components/menu'
-export * from './components/cart'
+export * from './shared/components'
+export * from './browse-menu/components'
+export * from './cart'
 export { MenuBrowseView } from './browse-menu'

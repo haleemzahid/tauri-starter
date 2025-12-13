@@ -1,8 +1,8 @@
 // CartItemList - Scrollable list of cart items
 
 import { CartItemRow } from './CartItemRow'
-import { useSelectedCartItemId, useSelectCartItem } from '../../shared/machines'
-import type { CartItem } from '../../shared/types'
+import { useSelectedCartItemId, useSelectCartItem } from '../shared/machines'
+import type { CartItem } from '../shared/types'
 
 interface CartItemListProps {
   items: CartItem[]

@@ -5,7 +5,7 @@ import {
   getProductsByCategoryId,
   getProductsByMenuId,
   getDirectProducts,
-} from '../shared/database'
+} from '../../shared/database'
 
 export function useProductsByCategory(categoryId: string | null) {
   return useQuery({

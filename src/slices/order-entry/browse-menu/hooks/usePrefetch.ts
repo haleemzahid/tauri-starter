@@ -6,7 +6,7 @@ import {
   getCategoriesByMenuId,
   getProductsByCategoryId,
   getProductsByMenuId,
-} from '../shared/database'
+} from '../../shared/database'
 
 export function usePrefetch() {
   const queryClient = useQueryClient()

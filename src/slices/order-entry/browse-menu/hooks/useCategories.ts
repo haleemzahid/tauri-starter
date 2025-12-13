@@ -1,7 +1,7 @@
 // useCategories hook - Fetch categories for a menu
 
 import { useQuery, keepPreviousData } from '@tanstack/react-query'
-import { getCategoriesByMenuId } from '../shared/database'
+import { getCategoriesByMenuId } from '../../shared/database'
 
 export function useCategories(menuId: string | null) {
   return useQuery({

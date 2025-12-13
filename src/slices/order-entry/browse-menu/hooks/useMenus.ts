@@ -1,7 +1,7 @@
 // useMenus hook - Fetch all menus
 
 import { useQuery } from '@tanstack/react-query'
-import { getMenus } from '../shared/database'
+import { getMenus } from '../../shared/database'
 
 export function useMenus() {
   return useQuery({

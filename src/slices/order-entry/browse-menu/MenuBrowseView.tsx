@@ -6,9 +6,9 @@ import {
   MenuTopBar,
   MenuBottomBar,
   VirtualizedTileGrid,
-} from '../components/menu'
-import { useMenuBrowse } from './useMenuBrowse'
-import { usePrefetch } from './usePrefetch'
+} from './components'
+import { useMenuBrowse } from './hooks/useMenuBrowse'
+import { usePrefetch } from './hooks/usePrefetch'
 import type { Product, Menu, MenuCategory } from '../shared/types'
 
 interface MenuBrowseViewProps {

@@ -3,8 +3,8 @@
 import { ArrowLeft, LayoutGrid } from 'lucide-react'
 import { ServiceMethodSelect } from './ServiceMethodSelect'
 import { CurrentUserBadge } from './CurrentUserBadge'
-import { ConfigurableButton } from '../shared'
-import type { ServiceMethod } from '../../shared/types'
+import { ConfigurableButton } from '../shared/components'
+import type { ServiceMethod } from '../shared/types'
 
 interface CartHeaderProps {
   serviceMethod: ServiceMethod | null

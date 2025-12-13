@@ -1,4 +1,4 @@
 // Discount View - Public exports
 
 export { DiscountView } from './DiscountView'
-export { useDiscounts } from './useDiscounts'
+export { useDiscounts } from './hooks/useDiscounts'

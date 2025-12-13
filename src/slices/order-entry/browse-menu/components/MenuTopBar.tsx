@@ -8,7 +8,7 @@ import {
   LogOut,
   MoreVertical,
 } from 'lucide-react'
-import { ConfigurableButton } from '../shared'
+import { ConfigurableButton } from '../../shared/components'
 
 interface MenuTopBarProps {
   onSearch?: () => void

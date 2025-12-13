@@ -1,6 +1,6 @@
 // ModifierView - Main container for product configuration (XState powered)
 
-import { useModifierFlow } from './useModifierFlow'
+import { useModifierFlow } from './hooks/useModifierFlow'
 import { ModifierHeader } from './ModifierHeader'
 import { ModifierTabs } from './ModifierTabs'
 import { SizeSelector } from './SizeSelector'

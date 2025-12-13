@@ -1,7 +1,7 @@
 // TotalsSection - Displays subtotal, tax, discount, total
 
-import { formatCurrency } from '../../shared/utils'
-import type { CartTotals } from '../../shared/types'
+import { formatCurrency } from '../shared/utils'
+import type { CartTotals } from '../shared/types'
 
 interface TotalsSectionProps {
   totals: CartTotals

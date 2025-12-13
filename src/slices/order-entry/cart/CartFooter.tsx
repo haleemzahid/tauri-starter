@@ -1,8 +1,8 @@
 // CartFooter - Bottom section with totals and action buttons
 
-import { formatCurrency } from '../../shared/utils'
+import { formatCurrency } from '../shared/utils'
 import { TotalsSection } from './TotalsSection'
-import type { CartTotals } from '../../shared/types'
+import type { CartTotals } from '../shared/types'
 
 interface CartFooterProps {
   totals: CartTotals

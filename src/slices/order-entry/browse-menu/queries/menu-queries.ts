@@ -1,7 +1,7 @@
 // Menu Database Queries
 
 import { getDatabase } from '@/core/database/client'
-import type { Menu, MenuCategory, Product } from '../types'
+import type { Menu, MenuCategory, Product } from '../../shared/types'
 
 /**
  * Get all active menus ordered by OrderNumber

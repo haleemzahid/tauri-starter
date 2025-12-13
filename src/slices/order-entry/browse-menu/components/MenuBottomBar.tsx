@@ -1,10 +1,10 @@
 // MenuBottomBar - Bottom action bar with item-level actions
 
-import { useOrderEntryActions } from '../../browse-menu/useOrderEntryActions'
+import { useOrderEntryActions } from '../hooks/useOrderEntryActions'
 import { useActionHandlers } from '../../shared/hooks/useActionHandlers'
 import { useSelectedCartItem } from '../../shared/machines'
 import { ActionButton } from './ActionButton'
-import { ConfirmDialog } from '../shared'
+import { ConfirmDialog } from '../../shared/components'
 
 export function MenuBottomBar() {
   const { data: actions = [], isLoading } = useOrderEntryActions()

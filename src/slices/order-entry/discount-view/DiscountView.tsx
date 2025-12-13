@@ -1,7 +1,7 @@
 // DiscountView - Discount selection grid
 
 import { memo } from 'react'
-import { useDiscounts } from './useDiscounts'
+import { useDiscounts } from './hooks/useDiscounts'
 import type { Discount } from '../shared/types'
 
 interface DiscountViewProps {

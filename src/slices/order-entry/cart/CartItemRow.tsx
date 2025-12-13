@@ -2,8 +2,8 @@
 
 import { memo } from 'react'
 import { Trash2 } from 'lucide-react'
-import { formatCurrency, calculateItemLinePrice } from '../../shared/utils'
-import type { CartItem } from '../../shared/types'
+import { formatCurrency, calculateItemLinePrice } from '../shared/utils'
+import type { CartItem } from '../shared/types'
 
 interface CartItemRowProps {
   item: CartItem

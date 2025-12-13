@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { useMenus } from './useMenus'
 import { useCategories } from './useCategories'
 import { useProductsByCategory, useProductsByMenu } from './useProducts'
-import type { Menu, MenuCategory, Product } from '../shared/types'
+import type { Menu, MenuCategory, Product } from '../../shared/types'
 
 export function useMenuBrowse(
   onProductSelect: (product: Product) => void | Promise<void>
