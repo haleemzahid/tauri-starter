@@ -1,7 +1,7 @@
 // ModifierTabs - Tab bar for Size/Type/Portion/ModifierGroups/Modifiers
 
 import { cn } from '@/slices/shared/utils/cn'
-import type { ModifierTab } from './ModifierView'
+import type { ModifierTab } from './useModifierFlow'
 
 const TAB_LABELS: Record<ModifierTab, string> = {
   sizes: 'Sizes',

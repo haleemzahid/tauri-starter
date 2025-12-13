@@ -53,8 +53,9 @@ export function ModifierGroupSelector({
       {firstUnsatisfied && (
         <div className="alert alert-warning mb-4">
           <span>
-            Please select a modifier from <strong>{firstUnsatisfied.name}</strong> before
-            accessing optional modifiers.
+            Please select a modifier from{' '}
+            <strong>{firstUnsatisfied.name}</strong> before accessing optional
+            modifiers.
           </span>
         </div>
       )}

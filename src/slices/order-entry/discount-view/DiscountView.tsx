@@ -72,7 +72,10 @@ interface DiscountTileProps {
   onClick: () => void
 }
 
-const DiscountTile = memo(function DiscountTile({ discount, onClick }: DiscountTileProps) {
+const DiscountTile = memo(function DiscountTile({
+  discount,
+  onClick,
+}: DiscountTileProps) {
   // discountPercentage comes from SQLite as string, parse to number
   const value = parseFloat(String(discount.discountPercentage)) || 0
   const displayValue = value.toFixed(1)
