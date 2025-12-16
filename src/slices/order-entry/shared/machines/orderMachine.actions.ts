@@ -246,6 +246,65 @@ export const removeItem = assign(
   }
 )
 
+export const removeItemModifier = assign(
+  ({ context, event }: { context: OrderContext; event: OrderEvent }) => {
+    if (event.type !== 'REMOVE_ITEM_MODIFIER') return context
+    return {
+      cart: context.cart.map((item) =>
+        item.id === event.itemId
+          ? {
+              ...item,
+              modifiers: item.modifiers.filter(
+                (m) => m.id !== event.modifierId
+              ),
+            }
+          : item
+      ),
+    }
+  }
+)
+
+export const removeItemPortion = assign(
+  ({ context, event }: { context: OrderContext; event: OrderEvent }) => {
+    if (event.type !== 'REMOVE_ITEM_PORTION') return context
+    return {
+      cart: context.cart.map((item) =>
+        item.id === event.itemId
+          ? {
+              ...item,
+              portions: item.portions.filter((p) => p.id !== event.portionId),
+            }
+          : item
+      ),
+    }
+  }
+)
+
+export const removePortionModifier = assign(
+  ({ context, event }: { context: OrderContext; event: OrderEvent }) => {
+    if (event.type !== 'REMOVE_PORTION_MODIFIER') return context
+    return {
+      cart: context.cart.map((item) =>
+        item.id === event.itemId
+          ? {
+              ...item,
+              portions: item.portions.map((p) =>
+                p.id === event.portionId
+                  ? {
+                      ...p,
+                      modifiers: p.modifiers.filter(
+                        (m) => m.id !== event.modifierId
+                      ),
+                    }
+                  : p
+              ),
+            }
+          : item
+      ),
+    }
+  }
+)
+
 export const selectCartItem = assign({
   selectedCartItemId: ({
     context,

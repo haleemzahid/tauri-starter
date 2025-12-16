@@ -125,6 +125,21 @@ export function useCartActions() {
   return useMemo(
     () => ({
       removeItem: (itemId: string) => send({ type: 'REMOVE_ITEM', itemId }),
+      removeItemModifier: (itemId: string, modifierId: string) =>
+        send({ type: 'REMOVE_ITEM_MODIFIER', itemId, modifierId }),
+      removeItemPortion: (itemId: string, portionId: string) =>
+        send({ type: 'REMOVE_ITEM_PORTION', itemId, portionId }),
+      removePortionModifier: (
+        itemId: string,
+        portionId: string,
+        modifierId: string
+      ) =>
+        send({
+          type: 'REMOVE_PORTION_MODIFIER',
+          itemId,
+          portionId,
+          modifierId,
+        }),
       setItemDiscount: (itemId: string, discount: Discount | null) =>
         send({ type: 'SET_ITEM_DISCOUNT', itemId, discount }),
     }),

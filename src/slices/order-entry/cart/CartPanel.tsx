@@ -29,7 +29,10 @@ export function CartPanel({
 }: CartPanelProps) {
   const items = useCart()
   const totals = useCartTotals()
-  const { removeItem } = useCartActions()
+  const cartActions = useCartActions()
+  const { removeItem, removeItemPortion, removePortionModifier } = cartActions
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+  const removeItemModifier = cartActions.removeItemModifier
 
   const { width, panelRef, startResize } = useResizablePanel({
     storageKey: 'cart-panel-width',
@@ -55,6 +58,12 @@ export function CartPanel({
         items={items}
         onDoubleClickItem={onDoubleClickItem}
         onRemoveItem={removeItem}
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        onRemoveModifier={removeItemModifier}
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        onRemovePortion={removeItemPortion}
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        onRemovePortionModifier={removePortionModifier}
       />
 
       <CartFooter

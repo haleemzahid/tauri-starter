@@ -11,6 +11,13 @@ interface CartItemRowProps {
   onSelect: (item: CartItem) => void
   onDoubleClick: (item: CartItem) => void
   onRemove: (itemId: string) => void
+  onRemoveModifier?: (itemId: string, modifierId: string) => void
+  onRemovePortion?: (itemId: string, portionId: string) => void
+  onRemovePortionModifier?: (
+    itemId: string,
+    portionId: string,
+    modifierId: string
+  ) => void
 }
 
 // Style classes extracted for readability
@@ -26,6 +33,9 @@ export const CartItemRow = memo(function CartItemRow({
   onSelect,
   onDoubleClick,
   onRemove,
+  onRemoveModifier,
+  onRemovePortion,
+  onRemovePortionModifier,
 }: CartItemRowProps) {
   const hasModifiers = item.modifiers.length > 0 || item.portions.length > 0
   const hasSpecialRequests = (item.specialRequests?.length ?? 0) > 0
@@ -101,13 +111,35 @@ export const CartItemRow = memo(function CartItemRow({
                 {Number(mod.topping.price) > 0 &&
                   ` (+${formatCurrency(Number(mod.topping.price) * mod.quantity)})`}
               </span>
+              {onRemoveModifier && (
+                <button
+                  className="btn btn-ghost btn-xs text-error"
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    onRemoveModifier(item.id, mod.id)
+                  }}
+                >
+                  <Trash2 className="h-3 w-3" />
+                </button>
+              )}
             </div>
           ))}
           {/* Portion-level modifiers grouped by portion */}
           {item.portions.map((portion) => (
             <div key={portion.id}>
-              <div className="mt-1 font-medium text-base-content/80">
-                {portion.portionType.name}
+              <div className="mt-1 flex items-center gap-1 font-medium text-base-content/80">
+                <span className="flex-1">{portion.portionType.name}</span>
+                {onRemovePortion && (
+                  <button
+                    className="btn btn-ghost btn-xs text-error"
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      onRemovePortion(item.id, portion.id)
+                    }}
+                  >
+                    <Trash2 className="h-3 w-3" />
+                  </button>
+                )}
               </div>
               {portion.modifiers.map((mod) => (
                 <div key={mod.id} className="ml-2 flex items-center gap-1">
@@ -119,6 +151,17 @@ export const CartItemRow = memo(function CartItemRow({
                     {mod.topping.displayName ?? mod.topping.name}
                     {mod.quantity > 1 && ` x${mod.quantity}`}
                   </span>
+                  {onRemovePortionModifier && (
+                    <button
+                      className="btn btn-ghost btn-xs text-error"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        onRemovePortionModifier(item.id, portion.id, mod.id)
+                      }}
+                    >
+                      <Trash2 className="h-3 w-3" />
+                    </button>
+                  )}
                 </div>
               ))}
             </div>

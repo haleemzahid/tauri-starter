@@ -98,7 +98,9 @@ export function ToppingGrid({
 
       if (isSelected && !selectedAffix) {
         // Deselect - remove this topping (only if no affix selected)
-        newModifiers = currentModifiers.filter((m) => m.topping.id !== topping.id)
+        newModifiers = currentModifiers.filter(
+          (m) => m.topping.id !== topping.id
+        )
       } else if (activeCategory.canAddMultiple) {
         // Multi-select: add to existing (with affix if selected)
         const newMod: CartItemModifier = {

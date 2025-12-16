@@ -8,12 +8,22 @@ interface CartItemListProps {
   items: CartItem[]
   onDoubleClickItem: (item: CartItem) => void
   onRemoveItem: (itemId: string) => void
+  onRemoveModifier?: (itemId: string, modifierId: string) => void
+  onRemovePortion?: (itemId: string, portionId: string) => void
+  onRemovePortionModifier?: (
+    itemId: string,
+    portionId: string,
+    modifierId: string
+  ) => void
 }
 
 export function CartItemList({
   items,
   onDoubleClickItem,
   onRemoveItem,
+  onRemoveModifier,
+  onRemovePortion,
+  onRemovePortionModifier,
 }: CartItemListProps) {
   const selectedId = useSelectedCartItemId()
   const selectCartItem = useSelectCartItem()
@@ -41,6 +51,9 @@ export function CartItemList({
           onSelect={handleSelect}
           onDoubleClick={onDoubleClickItem}
           onRemove={onRemoveItem}
+          onRemoveModifier={onRemoveModifier}
+          onRemovePortion={onRemovePortion}
+          onRemovePortionModifier={onRemovePortionModifier}
         />
       ))}
     </div>

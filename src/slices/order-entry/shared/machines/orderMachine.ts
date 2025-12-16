@@ -53,6 +53,15 @@ export const orderMachine = setup({
         REMOVE_ITEM: {
           actions: 'removeItem',
         },
+        REMOVE_ITEM_MODIFIER: {
+          actions: 'removeItemModifier',
+        },
+        REMOVE_ITEM_PORTION: {
+          actions: 'removeItemPortion',
+        },
+        REMOVE_PORTION_MODIFIER: {
+          actions: 'removePortionModifier',
+        },
         SELECT_CART_ITEM: {
           actions: 'selectCartItem',
         },
@@ -94,6 +103,12 @@ export const orderMachine = setup({
         SET_QUANTITY: { actions: 'updateQuantity' },
         ADD_SPECIAL_REQUEST: { actions: 'addSpecialRequest' },
         REMOVE_SPECIAL_REQUEST: { actions: 'removeSpecialRequest' },
+
+        // Cart item actions (also available while configuring)
+        REMOVE_ITEM: { actions: 'removeItem' },
+        REMOVE_ITEM_MODIFIER: { actions: 'removeItemModifier' },
+        REMOVE_ITEM_PORTION: { actions: 'removeItemPortion' },
+        REMOVE_PORTION_MODIFIER: { actions: 'removePortionModifier' },
 
         // Flow control
         CONFIRM_ITEM: {

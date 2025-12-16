@@ -72,6 +72,14 @@ export type OrderEvent =
   // Cart actions
   | { type: 'SELECT_CART_ITEM'; itemId: string | null }
   | { type: 'REMOVE_ITEM'; itemId: string }
+  | { type: 'REMOVE_ITEM_MODIFIER'; itemId: string; modifierId: string }
+  | { type: 'REMOVE_ITEM_PORTION'; itemId: string; portionId: string }
+  | {
+      type: 'REMOVE_PORTION_MODIFIER'
+      itemId: string
+      portionId: string
+      modifierId: string
+    }
   | { type: 'SET_ITEM_DISCOUNT'; itemId: string; discount: Discount | null }
   | { type: 'DUPLICATE_ITEM'; itemId: string }
   | { type: 'SET_ITEM_TAX_FREE'; itemId: string; isTaxFree: boolean }

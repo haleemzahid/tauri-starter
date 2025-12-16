@@ -129,6 +129,26 @@ export function useModifierFlow() {
     }
   }, [portionsLength]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Switch to valid tab when current tab becomes locked (e.g., after deleting portions)
+  useEffect(() => {
+    if (isTabLocked(currentTab)) {
+      // Find first unlocked tab
+      const tabOrder: ModifierTab[] = [
+        'sizes',
+        'types',
+        'portions',
+        'modifier-groups',
+        'modifiers',
+      ]
+      for (const tab of tabOrder) {
+        if (availableTabs.includes(tab) && !isTabLocked(tab)) {
+          setCurrentTab(tab)
+          return
+        }
+      }
+    }
+  }, [currentTab, isTabLocked, availableTabs])
+
   // Advance to next tab
   const advanceTab = useCallback(
     (fromTab: ModifierTab) => {
