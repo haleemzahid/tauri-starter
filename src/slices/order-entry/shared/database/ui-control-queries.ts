@@ -14,7 +14,7 @@ export async function getUIControlByName(
 ): Promise<UIControl | null> {
   // Check cache first
   if (uiControlCache.has(name)) {
-    return uiControlCache.get(name)!
+    return uiControlCache.get(name) ?? null
   }
 
   const db = await getDatabase()
