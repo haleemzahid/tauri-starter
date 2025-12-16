@@ -1,6 +1,7 @@
 // ModifierView - Main container for product configuration (XState powered)
 
 import { useModifierFlow } from './hooks/useModifierFlow'
+import { useAffixes } from './hooks/useAffixes'
 import { ModifierHeader } from './ModifierHeader'
 import { ModifierTabs } from './ModifierTabs'
 import { SizeSelector } from './SizeSelector'
@@ -8,6 +9,7 @@ import { TypeSelector } from './TypeSelector'
 import { PortionSelector } from './PortionSelector'
 import { ModifierGroupSelector } from './ModifierGroupSelector'
 import { ToppingGrid } from './ToppingGrid'
+import { AffixSelector } from './AffixSelector'
 
 interface ModifierViewProps {
   onConfirm: () => void
@@ -35,6 +37,8 @@ export function ModifierView({
     selectCategory,
     goToRequired,
   } = useModifierFlow()
+
+  const { affixes, selectedAffix, selectAffix, clearAffix } = useAffixes()
 
   if (!product || !item) {
     return (
@@ -78,12 +82,21 @@ export function ModifierView({
           />
         )}
         {currentTab === 'modifiers' && (
-          <ToppingGrid
-            activeCategory={activeCategory}
-            isLocked={isModifiersTabLocked}
-            lockReason={firstUnsatisfied?.name}
-            onGoToRequired={goToRequired}
-          />
+          <>
+            <AffixSelector
+              affixes={affixes}
+              selectedAffix={selectedAffix}
+              onSelect={selectAffix}
+            />
+            <ToppingGrid
+              activeCategory={activeCategory}
+              isLocked={isModifiersTabLocked}
+              lockReason={firstUnsatisfied?.name}
+              onGoToRequired={goToRequired}
+              selectedAffix={selectedAffix}
+              onAffixUsed={clearAffix}
+            />
+          </>
         )}
       </div>
     </div>

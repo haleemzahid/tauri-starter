@@ -3,7 +3,11 @@
 import { useState, useCallback, useEffect } from 'react'
 import { useMenus } from './useMenus'
 import { useCategories } from './useCategories'
-import { useProductsByCategory, useProductsByMenu } from './useProducts'
+import {
+  useProductsByCategory,
+  useProductsByMenu,
+  useDirectProducts,
+} from './useProducts'
 import type { Menu, MenuCategory, Product } from '../../shared/types'
 
 export function useMenuBrowse(
@@ -22,6 +26,8 @@ export function useMenuBrowse(
     useProductsByMenu(selectedMenuId)
   const { data: categoryProducts = [], isLoading: categoryProductsLoading } =
     useProductsByCategory(selectedCategoryId)
+  const { data: directProducts = [], isLoading: directProductsLoading } =
+    useDirectProducts()
 
   const visibleMenus = menus.filter((m) => !m.isNoMenu)
 
@@ -66,12 +72,14 @@ export function useMenuBrowse(
     categories,
     menuProducts,
     categoryProducts,
+    directProducts,
 
     // Loading states
     menusLoading,
     categoriesLoading,
     menuProductsLoading,
     categoryProductsLoading,
+    directProductsLoading,
 
     // Handlers
     handleMenuSelect,

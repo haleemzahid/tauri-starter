@@ -8,6 +8,7 @@ import type {
   ToppingCategory,
   Topping,
   CartItemModifier,
+  Affix,
 } from '../shared/types'
 
 interface ToppingGridProps {
@@ -15,6 +16,8 @@ interface ToppingGridProps {
   isLocked?: boolean
   lockReason?: string
   onGoToRequired?: () => void
+  selectedAffix?: Affix | null
+  onAffixUsed?: () => void
 }
 
 export function ToppingGrid({
@@ -22,6 +25,8 @@ export function ToppingGrid({
   isLocked = false,
   lockReason,
   onGoToRequired,
+  selectedAffix,
+  onAffixUsed,
 }: ToppingGridProps) {
   const item = useEditingItem()
   const { setModifiers } = useModifierActions()
@@ -84,17 +89,19 @@ export function ToppingGrid({
       const isSelected = selectedIds.has(topping.id)
       let newModifiers: CartItemModifier[]
 
-      if (isSelected) {
-        // Deselect - remove this topping
+      if (isSelected && !selectedAffix) {
+        // Deselect - remove this topping (only if no affix selected)
         newModifiers = item.modifiers.filter((m) => m.topping.id !== topping.id)
       } else if (activeCategory.canAddMultiple) {
-        // Multi-select: add to existing
+        // Multi-select: add to existing (with affix if selected)
         const newMod: CartItemModifier = {
           id: crypto.randomUUID(),
           topping,
+          affix: selectedAffix ?? undefined,
           quantity: 1,
         }
         newModifiers = [...item.modifiers, newMod]
+        onAffixUsed?.()
       } else {
         // Single-select: remove other toppings from this category, add new one
         const categoryToppingIds = new Set(toppings.map((t) => t.id))
@@ -104,14 +111,24 @@ export function ToppingGrid({
         const newMod: CartItemModifier = {
           id: crypto.randomUUID(),
           topping,
+          affix: selectedAffix ?? undefined,
           quantity: 1,
         }
         newModifiers = [...otherMods, newMod]
+        onAffixUsed?.()
       }
 
       setModifiers(newModifiers)
     },
-    [item, selectedIds, activeCategory, toppings, setModifiers]
+    [
+      item,
+      selectedIds,
+      activeCategory,
+      toppings,
+      selectedAffix,
+      onAffixUsed,
+      setModifiers,
+    ]
   )
 
   return (

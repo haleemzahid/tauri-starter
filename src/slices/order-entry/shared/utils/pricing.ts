@@ -4,15 +4,12 @@
 import type { CartItem, CartItemModifier, CartTotals } from '../types'
 
 /**
- * Calculate modifier price (with affix adjustment)
+ * Calculate modifier price
+ * Affixes are visual only (prefix/suffix), they don't affect price
  */
 export function calculateModifierPrice(modifier: CartItemModifier): number {
   const basePrice = modifier.topping.price
-  const affixMultiplier = modifier.affix?.priceModifier ?? 1
-  // "No" affix typically has priceModifier = 0
-  // "Extra" might have priceModifier = 1.5 or 2
-  // Regular has priceModifier = 1
-  return basePrice * affixMultiplier * modifier.quantity
+  return basePrice * modifier.quantity
 }
 
 /**

@@ -27,10 +27,12 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
     categories,
     menuProducts,
     categoryProducts,
+    directProducts,
     menusLoading,
     categoriesLoading,
     menuProductsLoading,
     categoryProductsLoading,
+    directProductsLoading,
     handleMenuSelect,
     handleCategorySelect,
     handleProductSelect,
@@ -58,7 +60,11 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
       <div className="min-h-0 min-w-0 flex-1 overflow-x-auto p-4 pb-16">
         <div className="flex h-full min-w-full gap-2">
           {visibleMenus.length > 0 && (
-            <MenuColumn title="Menus" configName="Menus" isLoading={menusLoading}>
+            <MenuColumn
+              title="Menus"
+              configName="Menus"
+              isLoading={menusLoading}
+            >
               <VirtualizedTileGrid
                 items={visibleMenus}
                 selectedId={selectedMenuId}
@@ -76,6 +82,20 @@ export function MenuBrowseView({ onProductSelect }: MenuBrowseViewProps) {
             >
               <VirtualizedTileGrid
                 items={menuProducts}
+                showPrice
+                onItemClick={(item) => handleProductSelect(item as Product)}
+              />
+            </MenuColumn>
+          )}
+
+          {directProducts.length > 0 && (
+            <MenuColumn
+              title="Direct Products"
+              configName="Direct Products"
+              isLoading={directProductsLoading}
+            >
+              <VirtualizedTileGrid
+                items={directProducts}
                 showPrice
                 onItemClick={(item) => handleProductSelect(item as Product)}
               />

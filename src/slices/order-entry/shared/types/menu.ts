@@ -74,5 +74,6 @@ export interface Topping extends BaseEntity {
 
 export interface Affix extends BaseEntity {
   isPrefix: boolean
-  priceModifier: number // e.g., 0 for "No", 1.5 for "Extra"
+  backColor?: string
+  foreColor?: string
 }

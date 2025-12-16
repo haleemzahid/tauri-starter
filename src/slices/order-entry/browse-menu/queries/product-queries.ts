@@ -199,10 +199,10 @@ export async function getAffixes(): Promise<Affix[]> {
       Name as name,
       DisplayName as displayName,
       IsPrefix as isPrefix,
-      PriceModifier as priceModifier,
+      BackColor as backColor,
+      ForeColor as foreColor,
       OrderNumber as orderNumber
     FROM Affixes 
-    WHERE IsDeleted = 0
     ORDER BY OrderNumber
   `)
 }
