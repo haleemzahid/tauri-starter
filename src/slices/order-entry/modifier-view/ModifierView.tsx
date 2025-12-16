@@ -28,10 +28,14 @@ export function ModifierView({
     currentTab,
     setCurrentTab,
     activeCategory,
+    activePortion,
+    activePortionId,
+    selectPortion,
     availableTabs,
     unsatisfiedMandatory,
     firstUnsatisfied,
     isCategoryLocked,
+    isTabLocked,
     isModifiersTabLocked,
     advanceTab,
     selectCategory,
@@ -61,6 +65,7 @@ export function ModifierView({
         currentTab={currentTab}
         onTabChange={setCurrentTab}
         unsatisfiedCount={unsatisfiedMandatory.length}
+        isTabLocked={isTabLocked}
       />
 
       <div className="min-h-0 flex-1 overflow-auto">
@@ -90,6 +95,8 @@ export function ModifierView({
             />
             <ToppingGrid
               activeCategory={activeCategory}
+              activePortion={activePortion}
+              activePortionId={activePortionId}
               isLocked={isModifiersTabLocked}
               lockReason={firstUnsatisfied?.name}
               onGoToRequired={goToRequired}

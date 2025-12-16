@@ -57,6 +57,11 @@ export type OrderEvent =
   | { type: 'SET_TYPE'; productType: ProductType | null }
   | { type: 'SET_PORTIONS'; portions: PortionType[] }
   | { type: 'SET_MODIFIERS'; modifiers: CartItemModifier[] }
+  | {
+      type: 'SET_PORTION_MODIFIERS'
+      portionId: string
+      modifiers: CartItemModifier[]
+    }
   | { type: 'SET_QUANTITY'; quantity: number }
   | { type: 'ADD_SPECIAL_REQUEST'; request: SpecialRequest }
   | { type: 'REMOVE_SPECIAL_REQUEST'; requestId: string }

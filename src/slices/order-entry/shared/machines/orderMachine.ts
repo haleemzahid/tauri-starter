@@ -90,6 +90,7 @@ export const orderMachine = setup({
         SET_TYPE: { actions: 'updateType' },
         SET_PORTIONS: { actions: 'updatePortions' },
         SET_MODIFIERS: { actions: 'updateModifiers' },
+        SET_PORTION_MODIFIERS: { actions: 'updatePortionModifiers' },
         SET_QUANTITY: { actions: 'updateQuantity' },
         ADD_SPECIAL_REQUEST: { actions: 'addSpecialRequest' },
         REMOVE_SPECIAL_REQUEST: { actions: 'removeSpecialRequest' },

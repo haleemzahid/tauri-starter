@@ -27,9 +27,7 @@ export const CartItemRow = memo(function CartItemRow({
   onDoubleClick,
   onRemove,
 }: CartItemRowProps) {
-  const hasModifiers =
-    item.modifiers.length > 0 ||
-    item.portions.some((p) => p.modifiers.length > 0)
+  const hasModifiers = item.modifiers.length > 0 || item.portions.length > 0
   const hasSpecialRequests = (item.specialRequests?.length ?? 0) > 0
   const lineTotal = calculateItemLinePrice(item)
 
@@ -68,10 +66,8 @@ export const CartItemRow = memo(function CartItemRow({
             {item.product.displayName ?? item.product.name}
             {discountSuffix}
           </span>
-          {item.portions.length > 0 && (
-            <span className="text-base-content/70 ml-1 text-sm">
-              [{item.portions.map((p) => p.portionType.name).join(' / ')}]
-            </span>
+          {item.type && (
+            <div className="text-base-content/70 text-sm">{item.type.name}</div>
           )}
         </div>
 
@@ -94,31 +90,39 @@ export const CartItemRow = memo(function CartItemRow({
       {/* Modifiers */}
       {hasModifiers && (
         <div className="text-base-content/60 mt-1 ml-10 text-sm">
+          {/* Item-level modifiers */}
           {item.modifiers.map((mod) => (
-            <div key={mod.id} className="group flex items-center gap-1">
+            <div key={mod.id} className="flex items-center gap-1">
               <span className="flex-1">
                 {mod.affix && <span className="italic">{mod.affix.name} </span>}
-                • {mod.topping.displayName ?? mod.topping.name}
+                {!mod.affix && '• '}
+                {mod.topping.displayName ?? mod.topping.name}
                 {mod.quantity > 1 && ` x${mod.quantity}`}
                 {Number(mod.topping.price) > 0 &&
                   ` (+${formatCurrency(Number(mod.topping.price) * mod.quantity)})`}
               </span>
             </div>
           ))}
-          {item.portions.map((portion) =>
-            portion.modifiers.map((mod) => (
-              <div key={mod.id} className="group flex items-center gap-1">
-                <span className="flex-1">
-                  {mod.affix && (
-                    <span className="italic">{mod.affix.name} </span>
-                  )}
-                  • {mod.topping.displayName ?? mod.topping.name} (
-                  {portion.portionType.name})
-                  {mod.quantity > 1 && ` x${mod.quantity}`}
-                </span>
+          {/* Portion-level modifiers grouped by portion */}
+          {item.portions.map((portion) => (
+            <div key={portion.id}>
+              <div className="mt-1 font-medium text-base-content/80">
+                {portion.portionType.name}
               </div>
-            ))
-          )}
+              {portion.modifiers.map((mod) => (
+                <div key={mod.id} className="ml-2 flex items-center gap-1">
+                  <span className="flex-1">
+                    {mod.affix && (
+                      <span className="italic">{mod.affix.name} </span>
+                    )}
+                    {!mod.affix && '• '}
+                    {mod.topping.displayName ?? mod.topping.name}
+                    {mod.quantity > 1 && ` x${mod.quantity}`}
+                  </span>
+                </div>
+              ))}
+            </div>
+          ))}
         </div>
       )}
 

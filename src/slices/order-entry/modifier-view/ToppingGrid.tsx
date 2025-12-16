@@ -8,11 +8,14 @@ import type {
   ToppingCategory,
   Topping,
   CartItemModifier,
+  CartItemPortion,
   Affix,
 } from '../shared/types'
 
 interface ToppingGridProps {
   activeCategory: ToppingCategory | null
+  activePortion?: CartItemPortion | null
+  activePortionId?: string | null
   isLocked?: boolean
   lockReason?: string
   onGoToRequired?: () => void
@@ -22,6 +25,8 @@ interface ToppingGridProps {
 
 export function ToppingGrid({
   activeCategory,
+  activePortion,
+  activePortionId,
   isLocked = false,
   lockReason,
   onGoToRequired,
@@ -29,7 +34,7 @@ export function ToppingGrid({
   onAffixUsed,
 }: ToppingGridProps) {
   const item = useEditingItem()
-  const { setModifiers } = useModifierActions()
+  const { setModifiers, setPortionModifiers } = useModifierActions()
 
   if (!activeCategory) {
     return (
@@ -63,16 +68,18 @@ export function ToppingGrid({
 
   const toppings = activeCategory.toppings ?? []
 
-  // Get selected topping IDs from cart item (memoized with Set for O(1) lookup)
+  // Determine which modifiers to check based on whether we're editing a portion
+  const currentModifiers = activePortion?.modifiers ?? item?.modifiers ?? []
+
+  // Get selected topping IDs from current modifiers (memoized with Set for O(1) lookup)
   const selectedIds = useMemo(() => {
-    if (!item) return new Set<string>()
     const toppingIds = new Set(toppings.map((t) => t.id))
     return new Set(
-      item.modifiers
+      currentModifiers
         .filter((m) => toppingIds.has(m.topping.id))
         .map((m) => m.topping.id)
     )
-  }, [item?.modifiers, toppings])
+  }, [currentModifiers, toppings])
 
   if (toppings.length === 0) {
     return (
@@ -91,7 +98,7 @@ export function ToppingGrid({
 
       if (isSelected && !selectedAffix) {
         // Deselect - remove this topping (only if no affix selected)
-        newModifiers = item.modifiers.filter((m) => m.topping.id !== topping.id)
+        newModifiers = currentModifiers.filter((m) => m.topping.id !== topping.id)
       } else if (activeCategory.canAddMultiple) {
         // Multi-select: add to existing (with affix if selected)
         const newMod: CartItemModifier = {
@@ -100,12 +107,12 @@ export function ToppingGrid({
           affix: selectedAffix ?? undefined,
           quantity: 1,
         }
-        newModifiers = [...item.modifiers, newMod]
+        newModifiers = [...currentModifiers, newMod]
         onAffixUsed?.()
       } else {
         // Single-select: remove other toppings from this category, add new one
         const categoryToppingIds = new Set(toppings.map((t) => t.id))
-        const otherMods = item.modifiers.filter(
+        const otherMods = currentModifiers.filter(
           (m) => !categoryToppingIds.has(m.topping.id)
         )
         const newMod: CartItemModifier = {
@@ -118,16 +125,24 @@ export function ToppingGrid({
         onAffixUsed?.()
       }
 
-      setModifiers(newModifiers)
+      // Update portion modifiers or item modifiers based on context
+      if (activePortionId) {
+        setPortionModifiers(activePortionId, newModifiers)
+      } else {
+        setModifiers(newModifiers)
+      }
     },
     [
       item,
+      currentModifiers,
       selectedIds,
       activeCategory,
+      activePortionId,
       toppings,
       selectedAffix,
       onAffixUsed,
       setModifiers,
+      setPortionModifiers,
     ]
   )
 

@@ -81,18 +81,32 @@ export const updatePortions = assign({
   cart: ({ context, event }: { context: OrderContext; event: OrderEvent }) => {
     if (event.type !== 'SET_PORTIONS' || !context.editingItemId)
       return context.cart
-    return context.cart.map((item) =>
-      item.id === context.editingItemId
-        ? {
-            ...item,
-            portions: event.portions.map((p) => ({
-              id: crypto.randomUUID(),
-              portionType: p,
-              modifiers: [],
-            })),
-          }
-        : item
-    )
+    return context.cart.map((item) => {
+      if (item.id !== context.editingItemId) return item
+
+      // Keep existing portions, add new ones at the end
+      const existingCount = item.portions.length
+      const newCount = event.portions.length
+
+      // If adding portions, keep existing and add new
+      if (newCount > existingCount) {
+        const newPortions = event.portions.slice(existingCount).map((p) => ({
+          id: crypto.randomUUID(),
+          portionType: p,
+          modifiers: [],
+        }))
+        return {
+          ...item,
+          portions: [...item.portions, ...newPortions],
+        }
+      }
+
+      // If removing portions, trim from the end
+      return {
+        ...item,
+        portions: item.portions.slice(0, newCount),
+      }
+    })
   },
 })
 
@@ -103,6 +117,25 @@ export const updateModifiers = assign({
     return context.cart.map((item) =>
       item.id === context.editingItemId
         ? { ...item, modifiers: event.modifiers }
+        : item
+    )
+  },
+})
+
+export const updatePortionModifiers = assign({
+  cart: ({ context, event }: { context: OrderContext; event: OrderEvent }) => {
+    if (event.type !== 'SET_PORTION_MODIFIERS' || !context.editingItemId)
+      return context.cart
+    return context.cart.map((item) =>
+      item.id === context.editingItemId
+        ? {
+            ...item,
+            portions: item.portions.map((p) =>
+              p.id === event.portionId
+                ? { ...p, modifiers: event.modifiers }
+                : p
+            ),
+          }
         : item
     )
   },

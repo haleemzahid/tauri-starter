@@ -16,6 +16,7 @@ interface ModifierTabsProps {
   currentTab: ModifierTab
   onTabChange: (tab: ModifierTab) => void
   unsatisfiedCount?: number
+  isTabLocked?: (tab: ModifierTab) => boolean
 }
 
 export function ModifierTabs({
@@ -23,6 +24,7 @@ export function ModifierTabs({
   currentTab,
   onTabChange,
   unsatisfiedCount = 0,
+  isTabLocked,
 }: ModifierTabsProps) {
   if (availableTabs.length === 0) return null
 
@@ -30,6 +32,7 @@ export function ModifierTabs({
     <div className="border-base-300 bg-base-100 flex gap-2 border-b px-4 py-2">
       {availableTabs.map((tab) => {
         const isActive = tab === currentTab
+        const isLocked = isTabLocked?.(tab) ?? false
         // Show warning badge on modifier-groups tab when mandatory items unsatisfied
         const showWarning =
           (tab === 'modifier-groups' || tab === 'modifiers') &&
@@ -38,11 +41,16 @@ export function ModifierTabs({
         return (
           <button
             key={tab}
-            onClick={() => onTabChange(tab)}
+            onClick={() => !isLocked && onTabChange(tab)}
+            disabled={isLocked}
             className={cn(
               'btn btn-sm relative',
-              isActive ? 'btn-primary' : 'btn-ghost',
-              showWarning && !isActive && 'text-warning'
+              isActive
+                ? 'btn-primary'
+                : isLocked
+                  ? 'btn-outline opacity-60'
+                  : 'btn-ghost',
+              showWarning && !isActive && !isLocked && 'text-warning'
             )}
           >
             {TAB_LABELS[tab]}

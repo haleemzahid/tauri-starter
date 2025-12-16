@@ -87,10 +87,16 @@ export interface Invoice {
   employeeId: string
   employeeName?: string
   serviceMethodId: string
+  serviceMethodName?: string
+  discountId?: string
+  discountName?: string
+  discountPercentage?: number
   isTaxExempted: boolean
   isMakeToGo: boolean
   isHold: boolean
   subTotal: number
+  totalItemDiscount: number
+  totalInvoiceDiscount: number
   totalDiscount: number
   totalTax: number
   grandTotal: number
@@ -98,6 +104,9 @@ export interface Invoice {
   invoiceAsJsonString?: string // Serialized cart for hold invoices
   createdDate: Date
   completedDate?: Date
+  // Relations
+  items: InvoiceItem[]
+  tenders: InvoiceTender[]
 }
 
 export interface InvoiceItem {
@@ -105,15 +114,33 @@ export interface InvoiceItem {
   invoiceId: string
   productId: string
   productName: string
+  sizeId?: string
   sizeName?: string
+  typeId?: string
   typeName?: string
   quantity: number
   basePrice: number
   linePrice: number
+  discountId?: string
+  discountName?: string
+  discountPercentage?: number
   discountAmount: number
+  taxRate: number
   taxAmount: number
+  isTaxFree: boolean
   grandTotal: number
   orderNumber: number
+  // Relations
+  modifiers: InvoiceItemModifier[]
+  portions: InvoiceItemPortion[]
+  specialRequests: InvoiceItemSpecialRequest[]
+}
+
+export interface InvoiceItemSpecialRequest {
+  id: string
+  invoiceItemId: string
+  description: string
+  price: number
 }
 
 export interface InvoiceItemModifier {
@@ -131,6 +158,7 @@ export interface InvoiceItemPortion {
   invoiceItemId: string
   portionTypeId: string
   portionTypeName: string
+  modifiers: InvoiceItemModifier[]
 }
 
 export interface InvoiceTender {

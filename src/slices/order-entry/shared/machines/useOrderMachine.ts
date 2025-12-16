@@ -182,6 +182,8 @@ export function useModifierActions() {
         send({ type: 'SET_PORTIONS', portions }),
       setModifiers: (modifiers: CartItemModifier[]) =>
         send({ type: 'SET_MODIFIERS', modifiers }),
+      setPortionModifiers: (portionId: string, modifiers: CartItemModifier[]) =>
+        send({ type: 'SET_PORTION_MODIFIERS', portionId, modifiers }),
       setQuantity: (quantity: number) =>
         send({ type: 'SET_QUANTITY', quantity }),
       addSpecialRequest: (request: SpecialRequest) =>
