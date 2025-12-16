@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useForm } from '@tanstack/react-form'
 import { Delete, X } from 'lucide-react'
 import { useLogin } from './useLogin'
@@ -6,6 +6,11 @@ import { useLogin } from './useLogin'
 export default function LoginForm() {
   const [showNumpad, setShowNumpad] = useState(true)
   const loginMutation = useLogin()
+  const inputRef = useRef<HTMLInputElement>(null)
+
+  useEffect(() => {
+    inputRef.current?.focus()
+  }, [loginMutation.isError])
 
   const form = useForm({
     defaultValues: {
@@ -90,13 +95,13 @@ export default function LoginForm() {
                     Enter PIN
                   </legend>
                   <input
+                    ref={inputRef}
                     type="password"
                     inputMode="numeric"
                     maxLength={4}
                     className="input input-lg w-full text-center tracking-[0.5em] font-mono text-2xl"
                     value={field.state.value}
                     onChange={(e) => handlePinChange(e.target.value)}
-                    placeholder="••••"
                     autoFocus
                     disabled={loginMutation.isPending}
                   />
