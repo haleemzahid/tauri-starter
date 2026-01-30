@@ -5,6 +5,7 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import App from './App'
 import './index.css'
 import { initDatabase } from './core/database/client'
+import { startBackupService } from './core/backup'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +25,15 @@ async function startApp() {
   } catch (error) {
     console.error('❌ Failed to initialize database:', error)
   }
+
+  // Start MEGA backup service
+  startBackupService({
+    email: 'fidazahid.suit@gmail.com',
+    password: 'fida313691',
+    intervalMinutes: 15,
+  }).catch((err) => {
+    console.warn('⚠️ Backup service failed to start:', err)
+  })
 
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   ReactDOM.createRoot(document.getElementById('root')!).render(

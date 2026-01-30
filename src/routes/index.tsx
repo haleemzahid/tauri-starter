@@ -1,6 +1,9 @@
-import { createFileRoute } from '@tanstack/react-router'
-import { ListTodos } from '../slices/todos'
+import { createFileRoute, Navigate } from '@tanstack/react-router'
+
+function HomePage() {
+  return <Navigate to="/dashboard/my" />
+}
 
 export const Route = createFileRoute('/')({
-  component: ListTodos,
+  component: HomePage,
 } as const)

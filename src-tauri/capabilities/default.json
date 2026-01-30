@@ -10,6 +10,16 @@
     "sql:allow-load",
     "sql:allow-execute",
     "sql:allow-select",
-    "sql:allow-close"
+    "sql:allow-close",
+    "dialog:default",
+    "dialog:allow-save",
+    "fs:default",
+    "fs:read-all",
+    "fs:write-all",
+    {
+      "identifier": "fs:scope",
+      "allow": ["**"]
+    },
+    "vnidrop-share:default"
   ]
 }
